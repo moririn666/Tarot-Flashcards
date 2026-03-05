@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rider-Waite Tarot Flashcards</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0b14; --surface: #16121f; --card-bg: #1c1628;
+    --gold: #c9a84c; --gold2: #e8cc7a; --lavender: #a78bca;
+    --rose: #c47a8a; --teal: #5ba8a0; --text: #e8e0f0;
+    --muted: #9080a8; --border: rgba(201,168,76,0.25);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.35) 0%, transparent 100%),
+      radial-gradient(1px 1px at 62% 12%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 82% 58%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(2px 2px at 72% 88%, rgba(201,168,76,0.25) 0%, transparent 100%),
+      radial-gradient(2px 2px at 18% 52%, rgba(167,139,202,0.25) 0%, transparent 100%);
+    pointer-events: none; z-index: 0;
+  }
+  header {
+    width: 100%; max-width: 900px;
+    padding: 2.2rem 2rem 0.8rem;
+    text-align: center; position: relative; z-index: 1;
+  }
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 4vw, 2.1rem); letter-spacing: 0.1em;
+    background: linear-gradient(135deg, var(--gold), var(--gold2), var(--lavender));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 0.25rem;
+  }
+  header p { color: var(--muted); font-size: 0.92rem; font-style: italic; }
+
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    justify-content: center; padding: 0.7rem 2rem;
+    max-width: 900px; width: 100%; z-index: 1;
+  }
+  .filter-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); font-family: 'Cinzel', serif;
+    font-size: 0.68rem; letter-spacing: 0.08em;
+    padding: 0.38rem 0.9rem; border-radius: 18px; cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .filter-btn.active { background: rgba(201,168,76,0.1); border-color: var(--gold); color: var(--gold2); }
+
+  .progress-bar { width: 100%; max-width: 440px; height: 2px; background: var(--surface); border-radius: 2px; margin: 0.3rem auto 0; z-index: 1; }
+  .progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--gold), var(--lavender)); transition: width 0.4s ease; }
+  .progress-text { text-align: center; font-size: 0.8rem; color: var(--muted); margin: 0.3rem 0 0.5rem; z-index: 1; letter-spacing: 0.05em; }
+
+  .scene {
+    width: 300px; height: 560px;
+    perspective: 1400px; cursor: pointer;
+    margin: 0 auto 1rem; z-index: 1;
+  }
+  .card-3d {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.75s cubic-bezier(0.4,0,0.2,1);
+  }
+  .card-3d.flipped { transform: rotateY(180deg); }
+
+  .face {
+    position: absolute; inset: 0; border-radius: 14px;
+    backface-visibility: hidden; overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.8), 0 0 40px rgba(201,168,76,0.07);
+  }
+
+  /* FRONT */
+  .face-front {
+    background: var(--card-bg); border: 2px solid rgba(201,168,76,0.4);
+    display: flex; flex-direction: column;
+  }
+  .card-top-strip {
+    background: linear-gradient(135deg,#1a1230,#231940);
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+    padding: 0.38rem 0.8rem; text-align: center; flex-shrink: 0;
+  }
+  .strip-number { font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.2em; color:var(--gold); display:block; }
+  .strip-name   { font-family:'Cinzel',serif; font-size:0.95rem; font-weight:700; color:var(--gold2); letter-spacing:0.05em; }
+
+  .card-img-wrap {
+    flex: 1; position: relative; overflow: hidden; background: #0e0b16;
+  }
+  .card-img-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: top center; display: block;
+    filter: sepia(6%) contrast(1.04) brightness(0.98);
+    transition: opacity 0.5s ease;
+  }
+  .card-img-wrap img.hidden { opacity: 0; }
+  .card-img-wrap::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, transparent 18%, transparent 72%, rgba(0,0,0,0.3) 100%);
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Skeleton */
+  .img-skeleton {
+    position: absolute; inset: 0;
+    background: linear-gradient(110deg,#1a1228 30%,#251a38 50%,#1a1228 70%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s infinite;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 0.5rem;
+  }
+  .img-skeleton.hidden { display: none; }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .skel-sym  { font-size: 3rem; opacity: 0.13; animation: pulse 2s ease-in-out infinite; }
+  .skel-lbl  { font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.15em; color:var(--muted); opacity:0.45; }
+  @keyframes pulse { 0%,100%{opacity:0.1} 50%{opacity:0.22} }
+
+  .card-bottom-strip {
+    background: linear-gradient(135deg,#1a1230,#231940);
+    border-top: 1px solid rgba(201,168,76,0.22);
+    padding: 0.4rem 0.7rem;
+    display: flex; justify-content: center; gap: 0.35rem;
+    flex-wrap: wrap; flex-shrink: 0;
+  }
+  .tag { font-size:0.62rem; padding:0.17rem 0.52rem; border-radius:8px; letter-spacing:0.04em; font-family:'Cinzel',serif; }
+  .tag-arcana { background:rgba(201,168,76,0.1); color:var(--gold); border:1px solid rgba(201,168,76,0.2); }
+  .tag-suit   { background:rgba(167,139,202,0.1); color:var(--lavender); border:1px solid rgba(167,139,202,0.2); }
+  .tag-elem   { background:rgba(91,168,160,0.1);  color:var(--teal);     border:1px solid rgba(91,168,160,0.2); }
+
+  .flip-hint {
+    font-style:italic; color:var(--muted); text-align:center;
+    font-size:0.73rem; opacity:0.62; padding:0.28rem; flex-shrink:0;
+    background: var(--card-bg);
+  }
+  .corner { position:absolute; font-size:0.82rem; opacity:0.17; z-index:3; pointer-events:none; }
+  .corner.tl{top:7px;left:9px} .corner.tr{top:7px;right:9px;transform:scaleX(-1)}
+  .corner.bl{bottom:7px;left:9px;transform:scaleY(-1)} .corner.br{bottom:7px;right:9px;transform:scale(-1,-1)}
+
+  /* BACK */
+  .face-back {
+    background:#1a2230; border:2px solid rgba(91,168,160,0.3);
+    transform:rotateY(180deg);
+    padding:1rem; overflow-y:auto;
+    scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+    display:flex; flex-direction:column; gap:0.7rem;
+  }
+  .back-card-name {
+    font-family:'Cinzel',serif; font-size:0.98rem; font-weight:700;
+    color:var(--gold2); text-align:center;
+    border-bottom:1px solid var(--border); padding-bottom:0.45rem;
+  }
+  .back-label {
+    font-family:'Cinzel',serif; font-size:0.58rem; letter-spacing:0.15em;
+    color:var(--gold); text-transform:uppercase; margin-bottom:0.2rem;
+    display:flex; align-items:center; gap:0.4rem;
+  }
+  .back-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  .back-text { font-size:0.87rem; line-height:1.52; color:#cfc5e0; }
+  .back-text.rev { color:var(--rose); font-style:italic; }
+  .kw-chips { display:flex; flex-wrap:wrap; gap:0.27rem; margin-top:0.18rem; }
+  .kchip { font-size:0.64rem; padding:0.15rem 0.46rem; border-radius:7px; background:rgba(255,255,255,0.04); color:var(--muted); border:1px solid rgba(255,255,255,0.07); }
+
+  .nav { display:flex; align-items:center; gap:0.9rem; z-index:1; margin-bottom:2rem; flex-wrap:wrap; justify-content:center; }
+  .nav-btn {
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--text); font-family:'Cinzel',serif;
+    font-size:0.72rem; letter-spacing:0.08em;
+    padding:0.55rem 1.2rem; border-radius:20px; cursor:pointer; transition:all 0.2s;
+  }
+  .nav-btn:hover { background:rgba(201,168,76,0.1); border-color:var(--gold); color:var(--gold); }
+  .nav-btn:disabled { opacity:0.3; cursor:not-allowed; }
+  .shuffle-btn { background:rgba(167,139,202,0.08); border-color:var(--lavender); color:var(--lavender); }
+  .shuffle-btn:hover { background:rgba(167,139,202,0.18); color:var(--gold2); border-color:var(--gold2); }
+
+  .mode-row { display:flex; gap:0.4rem; justify-content:center; z-index:1; margin-bottom:0.6rem; flex-wrap:wrap; padding:0 1rem; }
+  .mode-btn {
+    background:transparent; border:1px solid var(--border);
+    color:var(--muted); font-family:'Cinzel',serif;
+    font-size:0.63rem; letter-spacing:0.08em;
+    padding:0.27rem 0.73rem; border-radius:11px; cursor:pointer; transition:all 0.2s;
+  }
+  .mode-btn.active { background:rgba(201,168,76,0.1); border-color:var(--gold); color:var(--gold); }
+
+  /* Yes/No badge */
+  .yn-row { display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap; }
+  .yn-badge {
+    display:inline-flex; align-items:center; gap:0.35rem;
+    font-family:'Cinzel',serif; font-size:0.7rem; letter-spacing:0.12em;
+    padding:0.28rem 0.85rem; border-radius:12px; font-weight:600;
+  }
+  .yn-yes   { background:rgba(91,168,100,0.15); color:#7ecf8a; border:1px solid rgba(91,168,100,0.3); }
+  .yn-no    { background:rgba(196,122,138,0.15); color:var(--rose); border:1px solid rgba(196,122,138,0.3); }
+  .yn-maybe { background:rgba(201,168,76,0.12); color:var(--gold); border:1px solid rgba(201,168,76,0.25); }
+  .yn-context { font-size:0.78rem; color:var(--muted); font-style:italic; line-height:1.4; }
+  .advice-text { font-size:0.87rem; line-height:1.58; color:#b8c8e0; font-style:italic; }
+
+  /* ── Site-wide nav ── */
+  .site-nav {
+    width: 100%;
+    background: rgba(10,8,18,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 1rem;
+  }
+  .site-nav a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.7rem 1.3rem;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .site-nav a:hover { color: var(--gold); }
+  .site-nav a.active { color: var(--gold2); border-bottom-color: var(--gold); }
+  .site-nav .nav-divider {
+    color: rgba(201,168,76,0.2);
+    font-size: 0.8rem;
+    padding: 0 0.2rem;
+    user-select: none;
+  }
+  .site-nav .nav-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    background: linear-gradient(135deg, var(--gold), var(--lavender));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-right: auto;
+    padding: 0.7rem 0;
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <span class="nav-brand">✦ TAROT STUDY</span>
+  <a href="index.html" class="active">🃏 Flashcards</a>
+  <span class="nav-divider">·</span>
+  <a href="journey.html">✨ The Fool's Journey</a>
+  <span class="nav-divider">·</span>
+  <a href="worksheet.html">📋 Reference & Worksheet</a>
+</nav>
+
+<header>
+  <h1>✦ Rider-Waite Tarot Flashcards ✦</h1>
+  <p>Original 1909 artwork by Pamela Colman Smith · Public Domain</p>
+</header>
+<div class="controls" id="filterRow"></div>
+<div class="mode-row">
+  <button class="mode-btn active" onclick="setMode('all',this)">All Aspects</button>
+  <button class="mode-btn" onclick="setMode('upright',this)">Upright</button>
+  <button class="mode-btn" onclick="setMode('reversed',this)">Reversed</button>
+  <button class="mode-btn" onclick="setMode('symbols',this)">Symbols</button>
+  <button class="mode-btn" onclick="setMode('yesno',this)">Yes / No</button>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+<div class="progress-text" id="progressText"></div>
+
+<div class="scene" id="scene" onclick="flipCard()">
+  <div class="card-3d" id="card3d">
+    <div class="face face-front">
+      <span class="corner tl">✦</span><span class="corner tr">✦</span>
+      <span class="corner bl">✦</span><span class="corner br">✦</span>
+      <div class="card-top-strip">
+        <span class="strip-number" id="stripNumber"></span>
+        <span class="strip-name"   id="stripName"></span>
+      </div>
+      <div class="card-img-wrap" id="cardImgWrap">
+        <div class="img-skeleton" id="imgSkeleton">
+          <div class="skel-sym" id="skelSym"></div>
+          <div class="skel-lbl">LOADING</div>
+        </div>
+        <img id="cardImg" class="hidden" alt="" />
+      </div>
+      <div class="card-bottom-strip" id="cardTags"></div>
+      <div class="flip-hint">✦ tap to reveal meanings ✦</div>
+    </div>
+    <div class="face face-back" id="backFace"></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">← Prev</button>
+  <button class="nav-btn shuffle-btn" onclick="shuffle()">⟳ Shuffle</button>
+  <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Next →</button>
+</div>
+
+<footer style="
+  width:100%; text-align:center; padding: 1.5rem 1rem 2rem;
+  font-family:'Crimson Pro',serif; font-size:0.8rem;
+  color: var(--muted); line-height:1.7; z-index:1; position:relative;
+  border-top: 1px solid rgba(201,168,76,0.1); margin-top: 0.5rem;
+">
+  <div style="margin-bottom:0.3rem; letter-spacing:0.05em;">
+    Tarot artwork by <strong style="color:var(--gold)">Pamela Colman Smith</strong> (1909) · Public Domain
+  </div>
+  <div style="font-size:0.72rem; opacity:0.6;">
+    Rider-Waite-Smith Tarot · First published by William Rider & Son, London
+  </div>
+</footer>
+
+<script>
+const WM = 'https://upload.wikimedia.org/wikipedia/commons/';
+
+const CARDS = [
+  // MAJOR ARCANA
+  {id:0,  arcana:'Major',name:'The Fool',          number:'0',   element:'Air',     suit:null,   symbol:'🌟',img:WM+'ar00.jpg',yesno:'yes',   yesnoRev:'maybe', ynContext:'A joyful yes — leap, begin, trust the unknown. The universe is conspiring in your favor.', ynRevContext:'Pause before leaping. Make sure this isn\'t recklessness dressed up as faith.', advice:'The Fool asks: what would you do if you weren\'t afraid? Do that. The timing will never be perfect — jump anyway. But reversed, slow down and ask if you\'ve thought this through.',
+    upright:'New beginnings, innocence, spontaneity, free spirit; joyful leap into the unknown with faith',reversed:'Recklessness, naivety, holding back from a necessary leap',symbols:'White sun, small dog (loyalty/instinct), cliff edge (leap of faith), rose (purity), colorful bag (unconscious wisdom)',keywords:['beginnings','spontaneity','adventure','faith','innocence'],numMeaning:'Zero — pure potential, the void before creation'},
+
+  {id:1,  arcana:'Major',name:'The Magician',      number:'I',   element:'Mercury', suit:null,   symbol:'🔮',img:WM+'ar01.jpg',yesno:'yes',   yesnoRev:'no',    ynContext:'Yes — you have all the tools. Now use them with intention and skill.', ynRevContext:'Not yet. Something is being misused or misaligned. Check your motives.', advice:'The Magician says: stop waiting for permission or perfect conditions. Your resources, skills, and will are already in place. Act now. Reversed — be honest about whether you\'re manipulating a situation rather than mastering it.',
+    upright:'Manifestation, resourcefulness, power, inspired action; all four elements at your command',reversed:'Manipulation, poor planning, untapped talents, gifts misused for selfish ends',symbols:'Infinity ∞ above head, four elemental tools on table, wand raised to heaven, hand pointing earth',keywords:['manifestation','willpower','skill','resources','action'],numMeaning:'One — individuation, will, beginning of manifestation'},
+
+  {id:2,  arcana:'Major',name:'The High Priestess',number:'II',  element:'Moon',    suit:null,   symbol:'🌙',img:WM+'ar02.jpg',yesno:'maybe', yesnoRev:'no',    ynContext:'The answer is not ready to be revealed yet. Trust what you feel, not what you can prove.', ynRevContext:'No — or at least, not with the information currently available. Something is hidden.', advice:'The High Priestess doesn\'t give straight answers — she gives deeper questions. Sit with this instead of forcing a decision. What does your gut say when the mind quiets? That\'s your answer.',
+    upright:'Intuition, sacred knowledge, divine feminine, subconscious wisdom; sit still, the answers emerge',reversed:'Secrets withheld, disconnected intuition, hidden agendas surfacing',symbols:'Pillars B & J (duality), pomegranate veil (hidden mysteries), crescent moon, Torah scroll',keywords:['intuition','mystery','subconscious','wisdom','patience'],numMeaning:'Two — duality, the space between knowing and mystery'},
+
+  {id:3,  arcana:'Major',name:'The Empress',       number:'III', element:'Venus',   suit:null,   symbol:'🌿',img:WM+'ar03.jpg',yesno:'yes',   yesnoRev:'maybe', ynContext:'A lush, abundant yes. Growth, creativity, and love are all favored right now.', ynRevContext:'The energy is there but blocked — creative stagnation or a need for self-nurturing first.', advice:'The Empress says: receive. You don\'t have to earn everything through effort. Let yourself be nourished — by beauty, nature, rest, love, pleasure. What have you been denying yourself? Start there.',
+    upright:'Femininity, beauty, nature, nurturing, abundance; creative energy in full bloom, the divine mother',reversed:'Creative block, smothering, neglect of self, disconnection from nature',symbols:'Crown of 12 stars (zodiac), wheat field (harvest), Venus shield symbol, lush forest',keywords:['abundance','fertility','nature','nurturing','beauty'],numMeaning:'Three — creation, abundance, the fruit of union'},
+
+  {id:4,  arcana:'Major',name:'The Emperor',       number:'IV',  element:'Aries',   suit:null,   symbol:'⚡',img:WM+'ar04.jpg',yesno:'yes',   yesnoRev:'no',    ynContext:'Yes — if you lead with discipline, structure, and a clear plan. This is not the time to wing it.', ynRevContext:'No — there is a breakdown in authority, structure, or control. Get organized first.', advice:'The Emperor asks: do you have a plan, or just a wish? Build the scaffolding. Set the boundaries. Lead yourself before you try to lead anything else. Reversed — someone in authority may be blocking you, or you may be the one being inflexible.',
+    upright:'Authority, structure, fatherhood, order; creating stability from chaos; protective paternal power',reversed:'Domination, excessive control, rigidity, tyranny',symbols:'Ram-head throne (Aries), orb and scepter (worldly authority), armor beneath robe',keywords:['authority','structure','stability','power','control'],numMeaning:'Four — stability, earthly order, the four-square foundation'},
+
+  {id:5,  arcana:'Major',name:'The Hierophant',    number:'V',   element:'Taurus',  suit:null,   symbol:'⛪',img:WM+'ar05.jpg',yesno:'yes',   yesnoRev:'maybe', ynContext:'Yes, especially if you follow the established or traditional path. Conventional wisdom applies here.', ynRevContext:'Maybe — but it requires breaking from tradition or an institution. Are you ready for that?', advice:'The Hierophant encourages you to seek a teacher, follow proven methods, or honor a commitment you\'ve made. Not every rule deserves to be broken. Reversed — question the dogma. If the institution isn\'t serving you, it may be time to forge your own path.',
+    upright:'Spiritual wisdom, tradition, institutions, seeking a mentor; the conventional path holds real wisdom',reversed:'Challenging orthodoxy, unconventional spirituality, personal beliefs over doctrine',symbols:'Triple crown (three worlds), crossed keys (unlocking knowledge), two devotees, blessing gesture',keywords:['tradition','spirituality','institutions','conformity','guidance'],numMeaning:'Five — challenge, mediation, traditional wisdom tested'},
+
+  {id:6,  arcana:'Major',name:'The Lovers',        number:'VI',  element:'Gemini',  suit:null,   symbol:'💫',img:WM+'ar06.jpg',yesno:'yes',   yesnoRev:'no',    ynContext:'Yes — especially in love, relationships, or when a choice must align with your deepest values.', ynRevContext:'No — there is misalignment, a bad choice, or a relationship out of harmony.', advice:'The Lovers asks: is this truly what you want, or what you think you should want? Choose from your values, not your fear. Reversed — examine what\'s out of alignment. This isn\'t about who\'s wrong; it\'s about what no longer fits.',
+    upright:'Love, harmony, relationships, values alignment, deep soul connection; heart and mind in accord',reversed:'Disharmony, misaligned values, bad choices made from fear or ego',symbols:'Adam and Eve (duality, original choice), angel Raphael above, Tree of Knowledge, Tree of Life',keywords:['love','union','choices','values','harmony'],numMeaning:'Six — harmony born of duality, the beauty and burden of choice'},
+
+  {id:7,  arcana:'Major',name:'The Chariot',       number:'VII', element:'Cancer',  suit:null,   symbol:'🏆',img:WM+'ar07.jpg',yesno:'yes',   yesnoRev:'no',    ynContext:'Yes — charge forward. Victory is yours if you maintain focus and don\'t let opposing forces pull you apart.', ynRevContext:'No — you\'re scattered, lacking direction, or forcing something that needs a different approach.', advice:'The Chariot says: you already have what it takes to win this. The question is whether you can harness both your drive AND your doubt and move forward anyway. Stop second-guessing and commit.',
+    upright:'Control, willpower, victory, determination; harnessing opposing forces through sheer focused will',reversed:'Lost direction, aggression without purpose, self-discipline collapsed',symbols:'Two sphinxes (opposing forces), no reins (mental control only), starred canopy, moon crescents on armor',keywords:['willpower','victory','control','determination','focus'],numMeaning:'Seven — victory through persistence, inner conflict mastered'},
+
+  {id:8,  arcana:'Major',name:'Strength',          number:'VIII',element:'Leo',     suit:null,   symbol:'♾️',img:WM+'ar08.jpg',yesno:'yes',   yesnoRev:'maybe', ynContext:'Yes — through patience, compassion, and quiet persistence. Not by force.', ynRevContext:'Maybe — but inner doubts or self-sabotage need to be addressed first.', advice:'Strength reminds you that the most powerful thing you can do right now is be gentle — with yourself, with others, with the situation. Don\'t force it. Don\'t fight it. Love it into cooperation.',
+    upright:'Courage, patience, inner strength, compassion mastering primal instinct; gentle is more powerful than force',reversed:'Self-doubt, weakness, insecurity, bravado masking real fear',symbols:'Infinity ∞ above head, woman calmly closing lion\'s mouth (compassion over force), white robe, lion',keywords:['inner strength','courage','patience','compassion','influence'],numMeaning:'Eight — infinite strength found through compassion not domination'},
+
+  {id:9,  arcana:'Major',name:'The Hermit',        number:'IX',  element:'Virgo',   suit:null,   symbol:'🏔️',img:WM+'ar09.jpg',yesno:'maybe', yesnoRev:'no',    ynContext:'Maybe — but this isn\'t the time for external action. Turn inward first. The answer is already in you.', ynRevContext:'No — isolation or withdrawal is creating more problems than it solves. Come back out.', advice:'The Hermit says: before you act, be still. Journal. Meditate. Walk alone in nature. The guidance you\'re looking for isn\'t out there — it\'s in the quiet you keep avoiding. Light your own lantern.',
+    upright:'Soul-searching, introspection, solitude, inner guidance; the lantern you carry illuminates your own path alone',reversed:'Isolation, refusing guidance, lost in darkness, withdrawing too completely',symbols:'Lantern with Star of David (wisdom), staff (support), mountain peak (spiritual achievement), grey cloak',keywords:['solitude','reflection','introspection','guidance','wisdom'],numMeaning:'Nine — completion before new cycle, solitary mastery, inner light'},
+
+  {id:10, arcana:'Major',name:'Wheel of Fortune',  number:'X',   element:'Jupiter', suit:null,   symbol:'☸️',img:WM+'ar10.jpg',yesno:'yes',   yesnoRev:'no',    ynContext:'Yes — fate is turning in your favor. Ride the momentum. Luck is on your side.', ynRevContext:'No — the wheel is turning against this right now. Wait for a better cycle.', advice:'The Wheel of Fortune is a reminder that everything changes — including your current circumstances. If things are good, be grateful and build. If things are hard, hold on. This too shall turn. Nothing is permanent.',
+    upright:'Good luck, karma, destiny, turning point; cosmic tides are moving in your favor now',reversed:'Resisting inevitable change, clinging to what must transform, bad luck as teacher',symbols:'TORA (sacred law), four fixed zodiac signs in corners, snake (descent), Anubis (ascent), Sphinx (riddle)',keywords:['luck','fate','cycles','turning point','karma'],numMeaning:'Ten — completion of cycle, destiny, the turning of all things'},
+
+  {id:11, arcana:'Major',name:'Justice',           number:'XI',  element:'Libra',   suit:null,   symbol:'⚖️',img:WM+'ar11.jpg',yesno:'yes',   yesnoRev:'no',    ynContext:'Yes — if your cause is just and your actions have been fair. What is right will prevail.', ynRevContext:'No — there may be dishonesty, an unfair situation, or avoided accountability at play.', advice:'Justice asks: have you been honest? With yourself, with others? The outcome here is directly tied to the integrity of your actions so far. If your conscience is clear, proceed. If not, make it right before moving forward.',
+    upright:'Fairness, truth, cause and effect, law; what is ethically right will prevail; accountability',reversed:'Unfairness, refused accountability, dishonesty, consequence avoided — but not forever',symbols:'Scales (balance of truth), double-edged sword (truth cuts all), crown (impartial authority), purple veil',keywords:['justice','fairness','truth','law','cause & effect'],numMeaning:'Eleven — balance, cause and effect in perfect operation'},
+
+  {id:12, arcana:'Major',name:'The Hanged Man',    number:'XII', element:'Neptune', suit:null,   symbol:'🌀',img:WM+'ar12.jpg',yesno:'maybe', yesnoRev:'no',    ynContext:'Not yet — but a willing pause will reveal the answer. Surrender the need to know right now.', ynRevContext:'No — and fighting the pause is making it worse. Release what you\'re clinging to.', advice:'The Hanged Man is asking you to stop trying so hard. The answer isn\'t in more research, more effort, more planning — it\'s in the uncomfortable act of waiting. What would you gain by letting go of this completely for now?',
+    upright:'Surrender, pause, letting go, new perspectives; sacrifice now to gain everything; wisdom through reversal',reversed:'Martyrdom, stalling, refusing necessary sacrifice, false surrender without release',symbols:'Inverted figure (reversed worldview), halo (enlightenment), T-cross tree, leg as 4 (stability within surrender)',keywords:['surrender','pause','new perspectives','sacrifice','waiting'],numMeaning:'Twelve — suspension between worlds, the sacred pause'},
+
+  {id:13, arcana:'Major',name:'Death',             number:'XIII',element:'Scorpio', suit:null,   symbol:'🌑',img:WM+'ar13.jpg',yesno:'yes',   yesnoRev:'maybe', ynContext:'Yes — but something must end for this to begin. The transformation is necessary and ultimately liberating.', ynRevContext:'Maybe — but you\'re resisting the change that needs to happen first. The old must go.', advice:'Death is not asking if you\'re ready. It\'s telling you it\'s time. What needs to end for your next chapter to begin? Grieving is allowed. But don\'t let the grief keep you from crossing the threshold.',
+    upright:'Transformation, endings, change; the old must die for the new to be born; inevitable and liberating',reversed:'Resistance to change, stagnation, refusing to release what has already ended',symbols:'White horse (purity/inevitability), black armor (invincible change), rose flag (beauty within transformation), rising sun',keywords:['transformation','endings','change','transition','rebirth'],numMeaning:'Thirteen — transformation through ending, death and rebirth'},
+
+  {id:14, arcana:'Major',name:'Temperance',        number:'XIV', element:'Sagittarius',suit:null,symbol:'🌤️',img:WM+'ar14.jpg',yesno:'yes',   yesnoRev:'no',    ynContext:'Yes — with patience and moderation. Don\'t rush. Let the alchemy happen in its own time.', ynRevContext:'No — there is excess, imbalance, or forcing something that needs to flow naturally.', advice:'Temperance says: you don\'t have to choose between the extremes. There is a middle path that integrates both. What are you swinging between right now? Find the blend. Pour slowly. Trust the process.',
+    upright:'Balance, moderation, patience, purpose; blending opposites into alchemy; the middle path mastered',reversed:'Imbalance, excess, purpose lost, forcing where flow is needed',symbols:'Angel with two cups (alchemy of flow), one foot water/one land (two realms), triangle on chest (fire within matter)',keywords:['balance','moderation','patience','alchemy','purpose'],numMeaning:'Fourteen — synthesis of opposites, the alchemy of balance'},
+
+  {id:15, arcana:'Major',name:'The Devil',         number:'XV',  element:'Capricorn',suit:null,  symbol:'🔗',img:WM+'ar15.jpg',yesno:'no',    yesnoRev:'yes',   ynContext:'No — there is an unhealthy attachment, addiction, or limiting belief driving this question.', ynRevContext:'Yes — you are breaking free from something that bound you. Liberation is the answer.', advice:'The Devil asks: what are you afraid to admit to yourself? The chain is loose. You could leave at any time. So why haven\'t you? Name the thing that binds you — out loud if you can. That naming is the beginning of freedom.',
+    upright:'Shadow self, attachment, addiction, restriction; bondage that is ultimately chosen; seduction of materialism',reversed:'Breaking free, releasing limiting beliefs, reclaiming power from what controlled you',symbols:'Baphomet figure (shadow/duality), loose chains (chosen bondage), inverted pentagram (matter over spirit), torch',keywords:['shadow','bondage','materialism','addiction','limitation'],numMeaning:'Fifteen — the shadow, chains we choose for ourselves'},
+
+  {id:16, arcana:'Major',name:'The Tower',         number:'XVI', element:'Mars',    suit:null,   symbol:'⚡',img:WM+'ar16.jpg',yesno:'no',    yesnoRev:'maybe', ynContext:'No — and something built on false foundations is about to fall. Brace for upheaval; it leads to truth.', ynRevContext:'Maybe — the collapse is still coming but you have a window to dismantle false structures voluntarily.', advice:'The Tower is not asking your opinion. Change is happening whether you want it or not. What you can control: how you respond. Let what needs to fall, fall. What is built on truth will survive. What isn\'t — shouldn\'t.',
+    upright:'Sudden change, upheaval, revelation; false foundations must fall; what is built on truth will remain',reversed:'Fearing necessary upheaval, delaying the inevitable, internal revolution avoided',symbols:'Lightning bolt (divine truth breaking through), falling crown (ego dethroned), two figures falling, flames (purification)',keywords:['upheaval','sudden change','chaos','revelation','destruction'],numMeaning:'Sixteen — the sudden collapse of the false, destruction as clearing'},
+
+  {id:17, arcana:'Major',name:'The Star',          number:'XVII',element:'Aquarius',suit:null,   symbol:'✨',img:WM+'ar17.jpg',yesno:'yes',   yesnoRev:'maybe', ynContext:'Yes — with hope, faith, and an open heart. The universe is healing and supporting you.', ynRevContext:'Maybe — hope is present but dim. Reconnect to what inspires you before moving forward.', advice:'The Star says: you are allowed to hope again. After all that darkness, hope isn\'t naivety — it\'s radical courage. Pour your energy into the world freely, like water from a jug. Trust that it doesn\'t run out.',
+    upright:'Hope, faith, renewal, serenity; pouring healing into world and self; deep trust that the universe has you',reversed:'Loss of faith, despair, disconnection from one\'s own inner starlight',symbols:'Eight-pointed star (Venus/eternity), nude figure (vulnerable openness), two vessels (giving and receiving), ibis bird',keywords:['hope','faith','renewal','serenity','healing'],numMeaning:'Seventeen — hope distilled, the guiding light after the storm'},
+
+  {id:18, arcana:'Major',name:'The Moon',          number:'XVIII',element:'Pisces', suit:null,   symbol:'🌕',img:WM+'ar18.jpg',yesno:'maybe', yesnoRev:'no',    ynContext:'Unclear — things are not as they appear. Trust your gut over your logic right now.', ynRevContext:'No — deception, confusion, or fear is clouding the reality. Something hidden needs to surface first.', advice:'The Moon says: your anxiety is not evidence. The monster you fear in the dark may be smaller in the daylight. But also — your intuition is picking up something real. The key is learning to tell the difference. Breathe. Feel. Don\'t decide from fear.',
+    upright:'Illusion, fear, the unconscious, intuition; navigating between real and imagined on the midnight path',reversed:'Fears releasing, repressed emotions surfacing, confusion finally clearing after long fog',symbols:'Full moon with face (cyclic nature), two towers (gateway between worlds), howling dog and wolf, crayfish from water',keywords:['illusion','fear','unconscious','intuition','mystery'],numMeaning:'Eighteen — the liminal realm, illusion, the unconscious unveiled'},
+
+  {id:19, arcana:'Major',name:'The Sun',           number:'XIX', element:'Sun',     suit:null,   symbol:'☀️',img:WM+'ar19.jpg',yesno:'yes',   yesnoRev:'yes',   ynContext:'A resounding YES — one of the most positive cards in the deck. Go. Do. Be. Shine.', ynRevContext:'Still yes, but something is blocking the joy from fully landing. The answer is good; the timing might need adjusting.', advice:'The Sun is one of the deck\'s rarest unconditional yeses. Whatever you\'re asking about — love, career, health, a dream — the energy is favorable. Don\'t overthink it. Step into the light.',
+    upright:'Positivity, joy, warmth, success, vitality; childlike joy returned; clarity and truth after long darkness',reversed:'Joy blocked, pessimism, inner child suppressed, vitality present but temporarily obscured',symbols:'Large radiant sun (vitality/consciousness), child on white horse (innocence in victory), sunflowers, banner (triumph)',keywords:['joy','success','vitality','optimism','clarity'],numMeaning:'Nineteen — radiant consciousness, full expression of the self'},
+
+  {id:20, arcana:'Major',name:'Judgement',         number:'XX',  element:'Pluto',   suit:null,   symbol:'🎺',img:WM+'ar20.jpg',yesno:'yes',   yesnoRev:'maybe', ynContext:'Yes — and it\'s time. The call has been sounding for a while. Answer it now.', ynRevContext:'Maybe — but self-doubt or guilt from the past is keeping you from stepping into what\'s next.', advice:'Judgement asks: what is your soul actually calling you toward — underneath all the noise, the fear, the expectations? That call is the answer. You already know what you need to do. The card is asking why you haven\'t done it yet.',
+    upright:'Awakening, reckoning, absolution; answering a higher calling; resurrection into truest self',reversed:'Refusing the call, self-doubt, failing to learn from the past, staying asleep when awakening is needed',symbols:'Angel with trumpet (divine summons), rising figures (resurrection), red cross banner, water below (emotional reckoning)',keywords:['awakening','reckoning','renewal','absolution','calling'],numMeaning:'Twenty — final reckoning, transformation nearly complete'},
+
+  {id:21, arcana:'Major',name:'The World',         number:'XXI', element:'Saturn',  suit:null,   symbol:'🌍',img:WM+'ar21.jpg',yesno:'yes',   yesnoRev:'maybe', ynContext:'YES — complete, whole, achieved. This is the deck\'s card of total fulfillment. Success.', ynRevContext:'Not quite yet — there is one more step or loose end before true completion.', advice:'The World says: you have done the work. Now let yourself receive the completion. Don\'t downplay it. Don\'t rush to the next thing. Stand in the wholeness of what you have become and what you have built. Then, when you\'re ready — the Fool will leap again.',
+    upright:'Completion, integration, accomplishment, wholeness; the journey complete; all elements mastered and unified',reversed:'Incomplete cycles, shortcuts, one more step required, seeking personal closure',symbols:'Oval laurel wreath (eternal victory), dancing figure (freedom of completion), four fixed signs in corners, two wands',keywords:['completion','wholeness','accomplishment','integration','travel'],numMeaning:'Twenty-one — return to unity after the full journey'},
+
+  // WANDS
+  {id:22,arcana:'Minor',suit:'Wands',name:'Ace of Wands',   number:'Ace',  element:'Fire',symbol:'🔥',img:WM+'wa01.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — a spark of opportunity is right here. Light it now before it fades.',ynRevContext:'The spark is there but delayed. Creative block or false starts may need clearing first.',advice:'This is a green light for any creative or new venture. The Ace of Wands says your enthusiasm is your capital right now — invest it freely. Start the thing.',upright:'Inspiration, new opportunities, creative spark, potential; divine ignition of a new venture or passion',reversed:'Delays, creative block, motivation lost at the start of something new',symbols:'Hand from cloud (divine creative gift), sprouting wand (growth begins), distant castle (ambition ahead)',keywords:['inspiration','potential','new beginnings','fire','creativity'],numMeaning:'Ace — pure undivided essence of fire, the seed of all creative action'},
+  {id:23,arcana:'Minor',suit:'Wands',name:'Two of Wands',   number:'2',    element:'Fire',symbol:'🔥',img:WM+'wa02.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — but the bold move is required. This card rewards those who dare to think bigger.',ynRevContext:'No — fear of the unknown is the only thing in the way. But that fear isn\'t protecting you.',advice:'You have already done the hardest part — you had the vision. Now the Two of Wands asks: will you actually pursue it, or will you just hold the globe and admire the idea of adventure from a safe distance?',upright:'Future planning, progress, decisions; holding the world, seeing horizons stretch infinitely before you',reversed:'Fear of the unknown, playing it too safe, planning without the courage to act',symbols:'Figure holding globe (world is yours), two planted wands, ocean view (vast possibility ahead)',keywords:['planning','decisions','expansion','foresight','ambition'],numMeaning:'Two — duality in fire, direction being decided'},
+  {id:24,arcana:'Minor',suit:'Wands',name:'Three of Wands', number:'3',    element:'Fire',symbol:'🔥',img:WM+'wa03.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — your ships are already at sea. Trust the plans you\'ve set in motion.',ynRevContext:'Delays in expansion. Something that was supposed to return hasn\'t yet. Patience needed.',advice:'Three of Wands says the seeds you planted earlier are growing — you just can\'t see the harvest yet. Keep watching the horizon. The ships will come back.',upright:'Progress, expansion, watching plans manifest; first results arriving; overseas opportunity on the horizon',reversed:'Playing small, delays, obstacles blocking expansion, retreating from bold vision',symbols:'Figure watching ships on horizon (plans in motion), three firm wands, elevated cliff (broader perspective)',keywords:['expansion','foresight','overseas','progress','enterprise'],numMeaning:'Three — fire of two now bearing visible first fruit, expansion into the world'},
+  {id:25,arcana:'Minor',suit:'Wands',name:'Four of Wands',  number:'4',    element:'Fire',symbol:'🔥',img:WM+'wa04.jpg',yesno:'yes',  yesnoRev:'yes', ynContext:'Yes — celebration, homecoming, and community joy. Say yes to gathering, to love, to belonging.',ynRevContext:'Still yes, but the joy may be more private or the celebration incomplete. Still a positive card.',advice:'Four of Wands is one of the most wholehearted yeses in the deck. If you\'re asking about a relationship, a home, an event, or a milestone — this is a green light wrapped in flowers.',upright:'Celebration, harmony, homecoming, milestone reached; communal joy; a foundation worthy of dancing on',reversed:'Transition period, private celebration, lack of home support, joy not yet shared',symbols:'Four wands as archway (threshold of joy), dancing figures, garlands of flowers, welcoming castle beyond',keywords:['celebration','community','harmony','milestone','home'],numMeaning:'Four — stable fire, the foundation strong enough to celebrate on'},
+  {id:26,arcana:'Minor',suit:'Wands',name:'Five of Wands',  number:'5',    element:'Fire',symbol:'🔥',img:WM+'wa05.jpg',yesno:'maybe',yesnoRev:'no',  ynContext:'Maybe — but expect competition, conflict, or chaos. The path is not smooth.',ynRevContext:'No — the conflict is turning destructive or is being avoided in ways that are making things worse.',advice:'Five of Wands is not a no — it\'s a "yes, but it\'s going to be a fight." Ask yourself: is this battle worth your energy?',upright:'Conflict, competition, creative tension, debate; productive struggle when engaged honestly builds real strength',reversed:'Avoiding conflict, inner turmoil, competition turning destructive, suppressed aggression',symbols:'Five figures clashing wands (conflict/competition/debate), no clear victor',keywords:['conflict','competition','struggle','tension','diversity'],numMeaning:'Five — fire disrupted, friction that either builds or destroys'},
+  {id:27,arcana:'Minor',suit:'Wands',name:'Six of Wands',   number:'6',    element:'Fire',symbol:'🔥',img:WM+'wa06.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — victory and public recognition are coming. You have earned this.',ynRevContext:'No — a fall from grace or unearned confidence is getting in the way. Check your ego.',advice:'Six of Wands says: your win is real. Don\'t minimize it or shrink from the recognition. Ride in proudly.',upright:'Victory, public recognition, confidence; the triumphant return; recognition fully and rightfully earned',reversed:'Fall from grace, ego overreach, pride before a fall, public failure or humiliation',symbols:'Figure on white horse (triumph), crowd cheering, laurel wreath on both wand and head (double victory)',keywords:['victory','recognition','success','pride','leadership'],numMeaning:'Six — harmony restored through victory, fire proven and celebrated'},
+  {id:28,arcana:'Minor',suit:'Wands',name:'Seven of Wands', number:'7',    element:'Fire',symbol:'🔥',img:WM+'wa07.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — hold your ground. You are outnumbered but you have the high position. Don\'t yield.',ynRevContext:'No — you are overwhelmed and cannot sustain this defense. Strategic retreat may be needed.',advice:'Seven of Wands asks: do you actually believe in what you\'re defending? If you do, the critics below cannot touch you. Stand firm.',upright:'Challenge, perseverance, holding your ground; your position is elevated and worth defending — do not yield',reversed:'Overwhelmed by challengers, giving up ground, exhaustion from defending alone',symbols:'Figure on higher ground (advantageous but contested), six wands below (challengers), mismatched shoes',keywords:['perseverance','defense','courage','challenge','standing ground'],numMeaning:'Seven — fire tested by the world, quest requiring genuine courage'},
+  {id:29,arcana:'Minor',suit:'Wands',name:'Eight of Wands', number:'8',    element:'Fire',symbol:'🔥',img:WM+'wa08.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'YES — and fast. Things are moving at high speed. Don\'t hesitate or you\'ll miss the window.',ynRevContext:'No — timing is off. Delays, miscommunication, or missed signals are blocking progress.',advice:'Eight of Wands is one of the fastest yeses in the deck. The window is open RIGHT NOW. Act decisively. Don\'t overthink it.',upright:'Speed, swift action, movement, messages arriving; things are accelerating — time to keep up or get ahead',reversed:'Delays, frustration, miscommunication, slowed momentum, missed windows of opportunity',symbols:'Eight wands in flight through clear sky (pure momentum), pastoral landscape below (swift passage)',keywords:['speed','movement','progress','action','swift change'],numMeaning:'Eight — karmic fire, maximum momentum before completion'},
+  {id:30,arcana:'Minor',suit:'Wands',name:'Nine of Wands',  number:'9',    element:'Fire',symbol:'🔥',img:WM+'wa09.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — but it will require everything you have left. You are almost there. Don\'t quit now.',ynRevContext:'No — exhaustion and paranoia are winning right now. Rest before re-engaging.',advice:'Nine of Wands says you\'ve survived everything so far. This is not the time to give up. You\'re in the final stretch. Push through anyway.',upright:'Resilience, courage, persistence, last stand; wounded but unbroken; nearly there — do not give up now',reversed:'Exhaustion, paranoia, defensive walls too high, giving up one step before the finish',symbols:'Bandaged figure leaning on one wand (wounds sustained), eight wands standing behind (battles survived)',keywords:['resilience','persistence','courage','boundaries','last stand'],numMeaning:'Nine — near completion in fire, the final test before the cycle closes'},
+  {id:31,arcana:'Minor',suit:'Wands',name:'Ten of Wands',   number:'10',   element:'Fire',symbol:'🔥',img:WM+'wa10.jpg',yesno:'maybe',yesnoRev:'no',  ynContext:'Maybe — but the burden of getting there may cost more than expected. Are you willing to carry it?',ynRevContext:'No — you\'re already carrying too much. Let something go before adding more.',advice:'Ten of Wands says: you can do this, but you don\'t have to do ALL of it alone. What are you carrying that isn\'t actually yours to carry? Delegate, release, or ask for help.',upright:'Burden, responsibility, hard work; destination in sight — carry what you must to reach it',reversed:'Delegation needed, resentment of own load, releasing what no longer serves the journey',symbols:'Figure bent under ten wands (maximum burden), city in near distance (almost there)',keywords:['burden','responsibility','hard work','completion','overwhelm'],numMeaning:'Ten — fire completing its full cycle, maximum load before liberation'},
+  {id:32,arcana:'Minor',suit:'Wands',name:'Page of Wands',  number:'Page', element:'Fire',symbol:'🔥',img:WM+'wa11.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — especially if it\'s new, creative, or unexplored. The Page loves a fresh start.',ynRevContext:'The enthusiasm is there but scattered. Focus the spark before throwing yourself in.',advice:'Page of Wands says: you don\'t have to know everything before you begin. Your excitement is enough. Start the project, send the message, sign up for the class.',upright:'Inspiration, ideas, discovery, limitless potential; bright-eyed explorer of the creative realm; daring to begin',reversed:'Procrastination, creative tantrums, all spark no direction, fragile new ideas',symbols:'Young figure holding wand, barren landscape (yet to be explored), salamanders on tunic (fire, immortality)',keywords:['enthusiasm','exploration','discovery','potential','adventure'],numMeaning:'Page — the student of fire, fresh enthusiasm and curiosity'},
+  {id:33,arcana:'Minor',suit:'Wands',name:'Knight of Wands',number:'Knight',element:'Fire',symbol:'🔥',img:WM+'wa12.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — boldly and without hesitation. The Knight charges toward what he wants.',ynRevContext:'No — reckless action or scattered energy will backfire. Slow down and think first.',advice:'Knight of Wands says: your passion is your greatest asset right now. Channel it with direction and you are unstoppable.',upright:'Energy, passion, adventure, impulsiveness; charging forward with fire and daring; unstoppable momentum',reversed:'Anger, recklessness, scattered energy, starting things without finishing',symbols:'Knight on charging horse, wand raised high, orange plumes (fire), salamanders on armor',keywords:['energy','passion','adventure','impulsive','action'],numMeaning:'Knight — active, extreme expression of fire energy'},
+  {id:34,arcana:'Minor',suit:'Wands',name:'Queen of Wands', number:'Queen', element:'Fire',symbol:'🔥',img:WM+'wa13.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — with confidence, warmth, and charisma. Own the room.',ynRevContext:'Maybe — jealousy, burnout, or self-doubt are dimming the fire. Reconnect with your power.',advice:'Queen of Wands says: walk in like you own the place, because you kind of do. Your energy sets the tone of every room you enter. Step into that.',upright:'Courage, confidence, independence, magnetism; warmly charismatic; she makes things happen effortlessly',reversed:'Demanding, selfish, jealous, burned out fire, creative block',symbols:'Black cat (independent nature), sunflowers (vitality), wand in hand, lions on throne (strength)',keywords:['confidence','warmth','independence','vibrancy','leadership'],numMeaning:'Queen — inward, receptive, wise feminine mastery of fire'},
+  {id:35,arcana:'Minor',suit:'Wands',name:'King of Wands',  number:'King',  element:'Fire',symbol:'🔥',img:WM+'wa14.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — lead boldly. The King of Wands commands outcomes through vision and will.',ynRevContext:'No — leadership is being misused. Arrogance or unrealistic expectations are causing harm.',advice:'King of Wands: you have the vision, the energy, and the authority to make this happen. Stop waiting for consensus — lead.',upright:'Natural-born leader, vision, entrepreneurship, honor; master of fire who inspires others to act boldly',reversed:'Impulsive, overbearing, expecting too much, high standards become impossible demands',symbols:'Cape of salamanders, wand, lions and salamanders on throne (mastered fire), small lizard at feet',keywords:['leadership','vision','boldness','honor','entrepreneurship'],numMeaning:'King — outward, authoritative, accomplished mastery of fire'},
+
+  // CUPS
+  {id:36,arcana:'Minor',suit:'Cups',name:'Ace of Cups',   number:'Ace',  element:'Water',symbol:'💧',img:WM+'cu01.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — especially in love, creativity, or emotional new beginnings. Your heart is ready.',ynRevContext:'The emotional gift is available but the heart isn\'t quite open yet. Self-love work needed first.',advice:'Ace of Cups says: let yourself feel it. Emotional openness is your greatest power right now. Don\'t guard against what wants to move through you.',upright:'New love, emotional beginnings, compassion, creativity; the cup overflows — open your heart to receive',reversed:'Blocked emotions, self-love needed first, closed heart, emotional gift refused',symbols:'Overflowing cup (divine love), five streams (five senses), dove with wafer (peace/spirit), lily pads',keywords:['love','intuition','new feelings','compassion','overflow'],numMeaning:'Ace — pure undivided emotion, the wellspring of all feeling'},
+  {id:37,arcana:'Minor',suit:'Cups',name:'Two of Cups',   number:'2',    element:'Water',symbol:'💧',img:WM+'cu02.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — in love and partnership especially. Mutual feeling, genuine connection.',ynRevContext:'No — imbalance or miscommunication is breaking the connection.',advice:'Two of Cups is a beautiful yes for any question about relationships or love. It speaks of true reciprocity.',upright:'Unified love, partnership, mutual attraction; two hearts meeting in true balance and reciprocity',reversed:'Self-love needed, communication broken, imbalanced relationship, one-sided giving',symbols:'Two figures exchanging cups (equal giving), caduceus (healing through union), lion head (passion within water)',keywords:['partnership','union','love','attraction','connection'],numMeaning:'Two — water meeting water, the union of two emotional natures'},
+  {id:38,arcana:'Minor',suit:'Cups',name:'Three of Cups', number:'3',    element:'Water',symbol:'💧',img:WM+'cu03.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — celebrate, gather, connect. Joy is amplified when shared.',ynRevContext:'Maybe — but overindulgence, gossip, or social drama may complicate things.',advice:'Three of Cups says: who are your people? Call them. Gather. Let yourself be held by community and friendship.',upright:'Friendship, celebration, community, creativity; gather with those who lift you; shared joy multiplies',reversed:'Overindulgence, gossip, clique exclusion, celebration masking real emotional avoidance',symbols:'Three dancing women with raised cups (sisterhood, joy, abundance), garlands of fruit and flowers',keywords:['celebration','friendship','community','joy','sisterhood'],numMeaning:'Three — water as abundance, emotion overflowing into community'},
+  {id:39,arcana:'Minor',suit:'Cups',name:'Four of Cups',  number:'4',    element:'Water',symbol:'💧',img:WM+'cu04.jpg',yesno:'no',   yesnoRev:'yes', ynContext:'No — or at least, you can\'t see the yes being offered yet. Look up. Open your eyes.',ynRevContext:'Yes — you are finally opening to what was always available. Engagement returns.',advice:'Four of Cups is a nudge to look around. You\'re so focused on what you don\'t have that you\'re missing what\'s right in front of you.',upright:'Contemplation, reevaluation, discontent; turning inward; a new gift is being offered but going unnoticed',reversed:'New awareness, re-engaging with the world, seeing what was always available but missed',symbols:'Crossed-arms figure (closed off), three cups before, cloud offering fourth cup (the missed opportunity)',keywords:['apathy','contemplation','withdrawal','reevaluation','discontent'],numMeaning:'Four — water stagnated, emotion turned inward to the point of missing gifts'},
+  {id:40,arcana:'Minor',suit:'Cups',name:'Five of Cups',  number:'5',    element:'Water',symbol:'💧',img:WM+'cu05.jpg',yesno:'no',   yesnoRev:'yes', ynContext:'No — grief and regret are too present right now for a clear path forward. Honor the loss first.',ynRevContext:'Yes — healing has begun. You are turning to face what remains and finding it is enough.',advice:'Five of Cups: you are allowed to grieve. The only way through is through. But when you\'re ready — the two cups are still standing.',upright:'Regret, loss, grief, disappointment; mourning what is gone while ignoring what still remains',reversed:'Acceptance, forgiving self and others, moving on, finding what was never truly lost',symbols:'Figure in black cloak (grief), three spilled cups (what is lost), two standing cups behind (what remains), bridge ahead',keywords:['regret','loss','grief','disappointment','acceptance'],numMeaning:'Five — water disrupted by loss, grief as the gateway to wisdom'},
+  {id:41,arcana:'Minor',suit:'Cups',name:'Six of Cups',   number:'6',    element:'Water',symbol:'💧',img:WM+'cu06.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — especially if it involves the past, childhood, reunions, or returning to something familiar.',ynRevContext:'Maybe — nostalgia may be romanticizing something that wasn\'t actually that good. Look clearly.',advice:'Six of Cups asks: what from your past still has genuine sweetness? Reconnect with that.',upright:'Childhood, memories, innocence, nostalgia, past connections returning; a simpler sweetness available now',reversed:'Stuck in the past, over-romanticizing history, leaving childhood patterns behind for good',symbols:'Older child offering flower-filled cup to younger child (gift of memory), six cups, courtyard setting',keywords:['nostalgia','childhood','memories','innocence','reunion'],numMeaning:'Six — water harmonized through memory, nostalgic flow'},
+  {id:42,arcana:'Minor',suit:'Cups',name:'Seven of Cups', number:'7',    element:'Water',symbol:'💧',img:WM+'cu07.jpg',yesno:'maybe',yesnoRev:'yes', ynContext:'Unclear — you have too many options or fantasies right now. One of them is real. Discern carefully.',ynRevContext:'Yes — you are clearing illusion and choosing with clarity. The real path is becoming visible.',advice:'Seven of Cups says: not all of these visions are real. One is. The real one will have a quality of quiet certainty underneath the excitement.',upright:'Fantasy, choices, wishful thinking, illusion; many visions appear — only one is real and worth choosing',reversed:'Values clarified, illusion pierced, real choice made, grounded in truth',symbols:'Silhouette before seven cloud-cups (each a different dream or delusion), visions ranging from castle to serpent',keywords:['illusion','fantasy','choices','wishful thinking','confusion'],numMeaning:'Seven — water in its most illusory state, the vision quest requiring grounding'},
+  {id:43,arcana:'Minor',suit:'Cups',name:'Eight of Cups', number:'8',    element:'Water',symbol:'💧',img:WM+'cu08.jpg',yesno:'no',   yesnoRev:'maybe',ynContext:'No — or rather, not this. Something needs to be left behind before the real yes can arrive.',ynRevContext:'Maybe — you\'re hesitating to leave, and the hesitation may be wisdom or may be fear.',advice:'Eight of Cups says: you already know. Some part of you already knows this isn\'t it.',upright:'Abandonment, walking away, seeking deeper meaning; leaving behind what is complete but no longer satisfying',reversed:'Fear of moving on, returning to what you know is wrong, aimless drifting',symbols:'Figure walking toward mountains (spiritual journey), eight cups arranged below (what is left), red moon, river',keywords:['walking away','transition','disappointment','seeking','withdrawal'],numMeaning:'Eight — karmic water, the cycle of emotional completion requiring departure'},
+  {id:44,arcana:'Minor',suit:'Cups',name:'Nine of Cups',  number:'9',    element:'Water',symbol:'💧',img:WM+'cu09.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'YES — the wish card. This is the deck\'s strongest yes for questions about desire and fulfillment.',ynRevContext:'Maybe — satisfaction may be more inner than outer. What you\'re wishing for may not bring the joy you expect.',advice:'Nine of Cups is called the Wish Card — when it appears, your wish has a strong chance of coming true. But check: is this wish actually yours?',upright:'Contentment, satisfaction, gratitude, wish fulfilled; this is what emotional fulfillment actually feels like',reversed:'Inner happiness needed before outer, material contentment masking spiritual void',symbols:'Contented figure arms crossed (self-satisfaction), nine cups displayed proudly behind (fulfilled desires)',keywords:['contentment','wish fulfilled','satisfaction','gratitude','pleasure'],numMeaning:'Nine — water near its fullest, deep satisfaction before completion'},
+  {id:45,arcana:'Minor',suit:'Cups',name:'Ten of Cups',   number:'10',   element:'Water',symbol:'💧',img:WM+'cu10.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — total emotional fulfillment. This is the highest possible yes for love, family, and happiness.',ynRevContext:'Maybe — the happiness is present but something in the family or relationship dynamic is off.',advice:'Ten of Cups is a profound yes for any question about love, family, home, or belonging. Full hearts, a real home, people who choose each other.',upright:'Blissful relationships, family harmony, divine love, alignment; the vision of everything love could be',reversed:'Broken family dynamics, searching for outer joy when inner joy is what\'s needed first',symbols:'Couple arms raised in joy, dancing children, rainbow of ten cups (divine completion), home and river',keywords:['happiness','fulfillment','family','harmony','divine love'],numMeaning:'Ten — water completing its full cycle, love at its most total and inclusive'},
+  {id:46,arcana:'Minor',suit:'Cups',name:'Page of Cups',  number:'Page', element:'Water',symbol:'💧',img:WM+'cu11.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — a surprising, delightful yes. Something unexpected and emotionally lovely is on its way.',ynRevContext:'Maybe — an emotional immaturity or creative illusion is clouding the picture.',advice:'Page of Cups brings unexpected good news. That random thought, that dream, that strange idea that keeps returning? Pay attention to it.',upright:'Creative opportunities, intuitive messages, curiosity; a fish in a cup — unexpected magical news arrives',reversed:'Emotional immaturity, creative blocks, escapism, illusory projects',symbols:'Young figure holding cup with fish peeking out (unexpected message from the deep unconscious), ocean behind',keywords:['creativity','intuition','sensitivity','messages','wonder'],numMeaning:'Page — the dreaming heart, creative emotion in its earliest form'},
+  {id:47,arcana:'Minor',suit:'Cups',name:'Knight of Cups',number:'Knight',element:'Water',symbol:'💧',img:WM+'cu12.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — especially in romance or creative pursuit. A beautiful invitation is coming.',ynRevContext:'No — idealism or emotional manipulation is undermining the connection.',advice:'Knight of Cups is the romantic messenger — he arrives with proposals, creative invitations, and declarations.',upright:'Following the heart, romance, charm, creativity; gallant messenger of love and beautiful dreams',reversed:'Moodiness, jealousy, unrealistic expectations, manipulation through emotion',symbols:'Knight on calm white horse, winged helmet and boots (poetic imagination), cup held forward (offering emotion)',keywords:['romance','charm','creativity','following heart','messenger'],numMeaning:'Knight — active, questing expression of water, the romantic explorer'},
+  {id:48,arcana:'Minor',suit:'Cups',name:'Queen of Cups', number:'Queen', element:'Water',symbol:'💧',img:WM+'cu13.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — trust your emotions and your intuition here. Lead with compassion and it will work.',ynRevContext:'Maybe — emotional insecurity or codependency may be complicating your ability to trust what you feel.',advice:'Queen of Cups says: your empathy is your superpower right now. Lead with emotional intelligence, not logic.',upright:'Compassionate, caring, emotionally intelligent; she feels everything and still holds the cup steady',reversed:'Emotional insecurity, giving too much, co-dependency, using emotion to manipulate',symbols:'Elaborate covered cup (imagination within, not yet revealed), throne of sea creatures, sea behind her',keywords:['compassion','intuition','emotional depth','caring','empathy'],numMeaning:'Queen — inward, receptive, wise feminine mastery of water'},
+  {id:49,arcana:'Minor',suit:'Cups',name:'King of Cups',  number:'King',  element:'Water',symbol:'💧',img:WM+'cu14.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — lead with emotional wisdom, compassion, and calm. Balance feeling and reason.',ynRevContext:'Maybe — emotional manipulation or repression may be at play. Something isn\'t as calm as it appears.',advice:'King of Cups has mastered feeling deeply without being controlled by it. Stay emotionally present without losing your equilibrium.',upright:'Emotionally balanced, compassionate, diplomatic; master of feeling who does not let it overwhelm',reversed:'Emotional manipulation, coldness beneath warmth, repressed feelings, moodiness',symbols:'Throne floating on sea (at home in emotion), fish amulet (connection to the unconscious), cup and scepter',keywords:['emotional balance','wisdom','diplomacy','compassion','mastery'],numMeaning:'King — outward, authoritative, accomplished mastery of water'},
+
+  // SWORDS
+  {id:50,arcana:'Minor',suit:'Swords',name:'Ace of Swords',   number:'Ace',  element:'Air',symbol:'💨',img:WM+'sw01.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — with clarity, decisiveness, and truth. Cut through the confusion. The answer is clear.',ynRevContext:'Maybe — the clarity is obscured. Misleading information or confused thinking needs resolving first.',advice:'Ace of Swords cuts straight to the truth. Pick a side and commit. The mental clarity you need is available right now.',upright:'Breakthrough, clarity, sharp mind, truth cutting through illusion; mental power at its absolute peak',reversed:'Confusion, misused intellect, brilliant mind weaponized against self or others',symbols:'Hand from cloud with double-edged sword (truth cuts both ways), crown with olive and palm branches (victory through clarity)',keywords:['clarity','truth','breakthrough','intellect','justice'],numMeaning:'Ace — pure undivided intellect, the mind at its clearest and most powerful'},
+  {id:51,arcana:'Minor',suit:'Swords',name:'Two of Swords',   number:'2',    element:'Air',symbol:'💨',img:WM+'sw02.jpg',yesno:'maybe',yesnoRev:'no',  ynContext:'No clear answer — you are at an impasse. More information or time is needed before deciding.',ynRevContext:'No — forced to decide but not ready. Information that was hidden is now surfacing, complicating things.',advice:'Two of Swords says: staying frozen IS a choice. At some point, you have to remove the blindfold and look.',upright:'Difficult decisions, stalemate, blocked emotion; the blindfold is self-chosen; balance through not choosing yet',reversed:'Forced choice, information released, overwhelm from too many options now demanding decision',symbols:'Blindfolded figure with crossed swords (blocking heart and mind), crescent moon (intuition available if sought)',keywords:['indecision','stalemate','blocked emotion','avoidance','choices'],numMeaning:'Two — air in stalemate, two truths in perfect tension'},
+  {id:52,arcana:'Minor',suit:'Swords',name:'Three of Swords', number:'3',    element:'Air',symbol:'💨',img:WM+'sw03.jpg',yesno:'no',   yesnoRev:'yes', ynContext:'No — pain, loss, or heartbreak is the current reality. This isn\'t the time for a yes.',ynRevContext:'Yes — healing has begun. You are moving through the grief and coming out the other side.',advice:'Three of Swords: the only way through grief is through it. Let yourself feel it fully — pretending it isn\'t there makes it last longer.',upright:'Heartbreak, sorrow, grief, loss; painful but necessary — acknowledge what hurts before it can truly heal',reversed:'Releasing pain, negative self-talk recognized, optimism returning after grief is honored',symbols:'Three swords piercing a heart (thought penetrating emotion), storm clouds and rain (the acknowledged grief)',keywords:['heartbreak','sorrow','grief','pain','sadness'],numMeaning:'Three — the wound made visible, when thought meets heart'},
+  {id:53,arcana:'Minor',suit:'Swords',name:'Four of Swords',  number:'4',    element:'Air',symbol:'💨',img:WM+'sw04.jpg',yesno:'maybe',yesnoRev:'no',  ynContext:'Not yet — this is a card of rest and recuperation. The answer will be clearer after you\'ve recharged.',ynRevContext:'No — burnout or restlessness is creating obstacles. Rest is not optional right now.',advice:'Four of Swords says: stop. The decision will be exponentially clearer after you\'ve slept, stepped back, or sat in silence.',upright:'Rest, recuperation, contemplation, strategic pause; step back to restore before the next challenge',reversed:'Restlessness, burnout, forced rest needed, body and mind refusing to slow down',symbols:'Knight in repose on tomb (warrior at strategic rest), one sword below, three swords above, stained glass',keywords:['rest','recuperation','meditation','contemplation','peace'],numMeaning:'Four — air stabilized, the mind granted structured rest'},
+  {id:54,arcana:'Minor',suit:'Swords',name:'Five of Swords',  number:'5',    element:'Air',symbol:'💨',img:WM+'sw05.jpg',yesno:'no',   yesnoRev:'yes', ynContext:'No — someone wins this at a real cost to relationships or integrity. Not worth it.',ynRevContext:'Yes — letting go of the need to win allows a genuine resolution. Peace is possible.',advice:'Five of Swords asks: even if you win this battle, what do you lose? Sometimes the most powerful move is to concede.',upright:'Conflict, winning at a cost, empty triumph; is this battle worth winning if it costs this much?',reversed:'Reconciliation, making amends, releasing the need to be right, past conflict forgiven',symbols:'Triumphant figure with collected swords, two defeated figures behind (hollow victory, lost relationships)',keywords:['conflict','tension','defeat','hollow victory','dishonor'],numMeaning:'Five — air as conflict, every winner also loses something'},
+  {id:55,arcana:'Minor',suit:'Swords',name:'Six of Swords',   number:'6',    element:'Air',symbol:'💨',img:WM+'sw06.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — move forward. Calmer waters are ahead. Leave what you must behind.',ynRevContext:'Maybe — you want to move on but unresolved issues are pulling you back.',advice:'Six of Swords says: it\'s okay to go. You don\'t have to resolve everything before leaving. The shore ahead is genuinely calmer.',upright:'Transition, rite of passage, moving on; guided from turbulence toward calmer waters',reversed:'Resistance to necessary change, unfinished business anchoring you, returning to what was left',symbols:'Ferryman guiding figures to calmer shore, six swords in boat (burdens carried), turbulent left / calm right',keywords:['transition','moving on','travel','calm after storm','passage'],numMeaning:'Six — air finding equilibrium, passage from storm to peace'},
+  {id:56,arcana:'Minor',suit:'Swords',name:'Seven of Swords', number:'7',    element:'Air',symbol:'💨',img:WM+'sw07.jpg',yesno:'maybe',yesnoRev:'no',  ynContext:'Maybe — but something is being hidden, half-done, or handled deceptively. Proceed with caution.',ynRevContext:'No — the deception is coming to light. Something needs to be confronted honestly.',advice:'Seven of Swords is asking: are you being fully honest in this situation? Partial truths have full consequences.',upright:'Deception, strategy, cunning, solo action; sometimes stealth is genuinely wiser than direct confrontation',reversed:'Conscience awakened, deception exposed, coming clean, self-honesty finally required',symbols:'Figure sneaking with five swords (strategy or theft?), two left behind, circus tents (trickery)',keywords:['deception','strategy','sneakiness','cunning','betrayal'],numMeaning:'Seven — air turned cunning, the mind navigating rather than confronting'},
+  {id:57,arcana:'Minor',suit:'Swords',name:'Eight of Swords', number:'8',    element:'Air',symbol:'💨',img:WM+'sw08.jpg',yesno:'no',   yesnoRev:'yes', ynContext:'No — you feel trapped, but the trap is mostly mental. Limiting beliefs are creating the barrier.',ynRevContext:'Yes — you are breaking out of self-imposed limitations. Freedom is being chosen.',advice:'Eight of Swords: the bonds are loose. The prison is made of thought — of "I can\'t," "I shouldn\'t." Name the story. Then ask if it\'s actually true.',upright:'Negative thoughts, mental restriction, victim mindset; the blindfold is self-chosen — freedom is possible',reversed:'Self-acceptance, seeing clearly at last, mental chains recognized, freedom within reach',symbols:'Blindfolded bound figure (mental prison), swords surrounding but not touching (mind imprisons, not circumstance)',keywords:['restriction','imprisonment','victim mentality','self-imposed limits','trapped'],numMeaning:'Eight — karmic air, the mental cycles that bind us'},
+  {id:58,arcana:'Minor',suit:'Swords',name:'Nine of Swords',  number:'9',    element:'Air',symbol:'💨',img:WM+'sw09.jpg',yesno:'no',   yesnoRev:'yes', ynContext:'No — anxiety, fear, or nightmares are distorting the picture. This is not the moment for a clear yes.',ynRevContext:'Yes — the worst is over. The anxiety is lifting and you\'re reaching toward help and healing.',advice:'Nine of Swords says: your 3am thoughts are liars. But if something real is wrong, the card is asking you to reach out, not spiral alone.',upright:'Anxiety, worry, fear, nightmares, despair; the suffering in the mind is often far worse than the actual reality',reversed:'Hope emerging, reaching out for help, the worst has passed, dawn after the darkest night',symbols:'Figure in bed clutching face (3am mind), nine swords on wall (intrusive thoughts as weapons), patterned quilt',keywords:['anxiety','worry','fear','nightmares','despair'],numMeaning:'Nine — air near its breaking point, the final concentrated mental torment before clarity'},
+  {id:59,arcana:'Minor',suit:'Swords',name:'Ten of Swords',   number:'10',   element:'Air',symbol:'💨',img:WM+'sw10.jpg',yesno:'no',   yesnoRev:'maybe',ynContext:'No — this cycle has ended painfully. Something has already collapsed. Grieve it and begin the next chapter.',ynRevContext:'Maybe — recovery is beginning. The worst is definitively over even if it doesn\'t feel that way yet.',advice:'Ten of Swords: something is over, and it hurts. But look at the horizon — the sun is already rising. You survived this.',upright:'Painful endings, deep wounds, betrayal, rock bottom; it cannot get worse — and the sun is already rising',reversed:'Recovery beginning, fearing the inevitable, refusing to release what has already fully ended',symbols:'Figure face-down with ten swords in back (absolute defeat), calm water ahead (peace beyond ending), rising sun',keywords:['painful ending','betrayal','collapse','rock bottom','release'],numMeaning:'Ten — air completing its full cycle, total collapse as total renewal'},
+  {id:60,arcana:'Minor',suit:'Swords',name:'Page of Swords',  number:'Page', element:'Air',symbol:'💨',img:WM+'sw11.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — gather information, ask the hard questions, speak up. Your curiosity and directness will serve you.',ynRevContext:'Maybe — hasty words or premature action may create more problems than they solve.',advice:'Page of Swords says: ask the question you\'ve been afraid to ask. Do the research. Say the uncomfortable thing.',upright:'New ideas, curiosity, thirst for knowledge; mentally agile; gathering information before acting',reversed:'Haste, all talk no action, gossip, using knowledge as a weapon prematurely',symbols:'Young figure with sword aloft, wind-tossed trees (mental agility), clouds (ideas in motion)',keywords:['curiosity','communication','ideas','watchfulness','agility'],numMeaning:'Page — the curious mind, the watchful student of truth'},
+  {id:61,arcana:'Minor',suit:'Swords',name:'Knight of Swords',number:'Knight',element:'Air',symbol:'💨',img:WM+'sw12.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — charge forward decisively. Speed and mental clarity win this one.',ynRevContext:'No — reckless action or thinking without considering consequences will cause damage.',advice:'Knight of Swords says: you already know the answer. Stop deliberating and act. The window is open and the wind is at your back.',upright:'Ambitious, action-oriented, driven; charges toward the truth without hesitation or fear',reversed:'No direction, disregard for consequences, scattered thinking, charge without strategy',symbols:'Knight charging at full gallop (relentless forward motion), birds flying in same direction, stormy sky',keywords:['ambition','action','speed','directness','truth-seeking'],numMeaning:'Knight — active, extreme expression of air, the charging intellect'},
+  {id:62,arcana:'Minor',suit:'Swords',name:'Queen of Swords', number:'Queen', element:'Air',symbol:'💨',img:WM+'sw13.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — lead with clear thinking, direct communication, and firm boundaries. Truth wins.',ynRevContext:'Maybe — bitterness or coldness may be distorting judgment. Clear the emotional residue first.',advice:'Queen of Swords says: don\'t soften the truth to protect feelings. You see clearly. Say what you see.',upright:'Independent, unbiased judgment, clear boundaries, direct communication; she has survived and is wiser for it',reversed:'Overly emotional, easily influenced, cold cruelty, bitterness masquerading as wisdom',symbols:'Throne of clouds and butterflies (between worlds), sword raised (clear judgment), one hand extended (gesturing truth)',keywords:['independence','clear thinking','direct','boundaries','wisdom'],numMeaning:'Queen — inward, receptive, wise feminine mastery of air'},
+  {id:63,arcana:'Minor',suit:'Swords',name:'King of Swords',  number:'King',  element:'Air',symbol:'💨',img:WM+'sw14.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — approach this with logic, fairness, and clear principles. The truth-based path wins.',ynRevContext:'No — power or intellect is being misused. Manipulation or tyranny — subtle or overt — is at play.',advice:'King of Swords commands by the power of clear principled thinking. Remove emotion long enough to see the facts. Then act on the facts.',upright:'Mental clarity, intellectual power, authority, truth; commands by the power of reason and impartial judgment',reversed:'Manipulative, tyrannical, misusing power, cold calculation over compassion',symbols:'Double-edged sword (truth as authority), butterflies on throne (transformation), clouds (realm of thought)',keywords:['authority','intellect','truth','clarity','judgment'],numMeaning:'King — outward, authoritative, accomplished mastery of air'},
+
+  // PENTACLES
+  {id:64,arcana:'Minor',suit:'Pentacles',name:'Ace of Pentacles',   number:'Ace',  element:'Earth',symbol:'🌱',img:WM+'pe01.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — a golden opportunity is right here. Take it. The material and practical doors are open.',ynRevContext:'The opportunity exists but poor planning or scarcity mindset is blocking you from receiving it.',advice:'Ace of Pentacles says: the money, the job, the house — it\'s here. Take the meeting, sign the contract, make the investment.',upright:'New financial opportunity, manifestation, security; the universe offers you something concrete — reach for it',reversed:'Missed opportunity, scarcity mindset, failed manifestation, not ready to receive what is offered',symbols:'Hand from cloud offering gleaming pentacle (material gift from divine), lush garden below, floral arch (threshold into prosperity)',keywords:['opportunity','manifestation','prosperity','new beginnings','security'],numMeaning:'Ace — pure undivided earth, the seed of all material creation'},
+  {id:65,arcana:'Minor',suit:'Pentacles',name:'Two of Pentacles',   number:'2',    element:'Earth',symbol:'🌱',img:WM+'pe02.jpg',yesno:'maybe',yesnoRev:'no',  ynContext:'Maybe — you can make it work, but juggling these competing priorities is the challenge.',ynRevContext:'No — too much is being juggled and things are dropping. Get organized before adding more.',advice:'Two of Pentacles says: what can you put down? What actually needs your hands right now vs. what can wait or be delegated?',upright:'Multiple priorities, juggling, adaptability, time management; moving fluidly through competing demands',reversed:'Overwhelmed, financially disorganized, unsustainable juggling, dropping important balls',symbols:'Jester juggling two pentacles with infinity loop (endless balance), turbulent sea with ships (ups and downs)',keywords:['balance','adaptability','time management','priorities','juggling'],numMeaning:'Two — earth in flux, two material realities requiring constant graceful balance'},
+  {id:66,arcana:'Minor',suit:'Pentacles',name:'Three of Pentacles', number:'3',    element:'Earth',symbol:'🌱',img:WM+'pe03.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — especially if it involves collaboration, craftsmanship, or teamwork. Better together.',ynRevContext:'Maybe — a lack of coordination or disharmony in the group is undermining the effort.',advice:'Three of Pentacles says: don\'t go it alone on this one. Find your collaborators. Let people contribute. It isn\'t weakness — it\'s craft.',upright:'Teamwork, collaboration, mastery developing; work with others — it makes the outcome genuinely greater',reversed:'Disharmony, lack of focus, mediocrity, isolation when collaboration would serve',symbols:'Craftsman at work (developing mastery), two advisors with plans (collaboration), three pentacles in stone arch',keywords:['teamwork','collaboration','learning','skill','achievement'],numMeaning:'Three — earth bearing first visible fruit, material creation requiring cooperation'},
+  {id:67,arcana:'Minor',suit:'Pentacles',name:'Four of Pentacles',  number:'4',    element:'Earth',symbol:'🌱',img:WM+'pe04.jpg',yesno:'maybe',yesnoRev:'yes', ynContext:'Maybe — but fear of loss or excessive caution may be blocking the best outcome.',ynRevContext:'Yes — releasing control or financial rigidity opens real abundance.',advice:'Four of Pentacles asks: is what you\'re holding onto actually serving you, or just making you feel safer? Open the hand slightly.',upright:'Security, conservation, stability, saving; holding what you have built — but watch the grip doesn\'t become a cage',reversed:'Generosity unlocked, releasing control, opening to flow, trusting more will come',symbols:'Figure clutching pentacle to chest, head, and feet (total possession), city behind (society left behind in hoarding)',keywords:['security','stability','control','possession','saving'],numMeaning:'Four — earth consolidated, stability that risks becoming rigidity'},
+  {id:68,arcana:'Minor',suit:'Pentacles',name:'Five of Pentacles',  number:'5',    element:'Earth',symbol:'🌱',img:WM+'pe05.jpg',yesno:'no',   yesnoRev:'yes', ynContext:'No — hardship, financial strain, or feeling left out in the cold is the current reality.',ynRevContext:'Yes — recovery and finding your way back in from the cold has begun.',advice:'Five of Pentacles says: help is closer than it appears. Look up. There is warmth and support available. Who can you reach out to?',upright:'Financial loss, poverty, hardship, feeling left out in the cold; help exists — look up and look around',reversed:'Recovery from hardship beginning, inner resources found, spiritual wealth discovered within material lack',symbols:'Two figures in snow (cold hardship), stained glass window above (help available but unseen), bell around neck',keywords:['hardship','loss','poverty','isolation','struggle'],numMeaning:'Five — earth disrupted by loss, hardship as catalyst for inner resource'},
+  {id:69,arcana:'Minor',suit:'Pentacles',name:'Six of Pentacles',   number:'6',    element:'Earth',symbol:'🌱',img:WM+'pe06.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — generosity, sharing, and fair exchange are favored. Give and receive freely.',ynRevContext:'Maybe — strings are attached to a gift, or power dynamics in the giving are unbalanced.',advice:'Six of Pentacles asks: are you in a position to give, or to receive? Both are noble. What circulates returns.',upright:'Generosity, charity, giving and receiving, balanced flow; what circulates returns; abundance shared grows larger',reversed:'Strings attached to gifts, power imbalance in generosity, self-care neglected',symbols:'Merchant weighing coins on scale (fair exchange), two beggars receiving (gift flowing from abundance)',keywords:['generosity','charity','giving','sharing','abundance'],numMeaning:'Six — earth harmonized through sharing, the cycle of giving and receiving'},
+  {id:70,arcana:'Minor',suit:'Pentacles',name:'Seven of Pentacles', number:'7',    element:'Earth',symbol:'🌱',img:WM+'pe07.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — but in the long term. This isn\'t quick results territory. Plant and tend.',ynRevContext:'Maybe — impatience or diversion of effort is slowing growth that would otherwise succeed.',advice:'Seven of Pentacles says: the work is working, even when you can\'t see it. Long game.',upright:'Long-term vision, sustainable results, patience; pause to assess what you are growing — it is working',reversed:'Impatience, short-term vision, effort not yet yielding results, diversion of energy',symbols:'Figure leaning on tool (earned rest), pentacles growing on vine (patient cultivation), assessing the harvest',keywords:['patience','perseverance','assessment','long-term','investment'],numMeaning:'Seven — earth in the waiting, trusting the long cycle of material growth'},
+  {id:71,arcana:'Minor',suit:'Pentacles',name:'Eight of Pentacles', number:'8',    element:'Earth',symbol:'🌱',img:WM+'pe08.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — through dedicated effort, skill development, and showing up consistently.',ynRevContext:'Maybe — perfectionism or scattered focus is getting in the way of real progress.',advice:'Eight of Pentacles says: mastery is just practice, repeated with attention. Do the work. Do it again. Get a little better each time.',upright:'Diligence, skill development, mastery, dedication; hone your craft through patient focused practice',reversed:'Perfectionism as obstacle, lack of focus, misdirected effort, skills unused and atrophying',symbols:'Craftsman hammering pentacles (skill in development), six completed displayed, one in progress, city behind',keywords:['diligence','skill','craftsmanship','mastery','dedication'],numMeaning:'Eight — karmic earth, mastery earned through committed repetition'},
+  {id:72,arcana:'Minor',suit:'Pentacles',name:'Nine of Pentacles',  number:'9',    element:'Earth',symbol:'🌱',img:WM+'pe09.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — independence, abundance, and self-sufficiency are all available to you right now.',ynRevContext:'Maybe — what looks like independence may have hidden dependencies or insecurities underneath.',advice:'Nine of Pentacles is a luxurious yes. You have built this. Enjoy it without guilt. You earned the right to thrive.',upright:'Abundance, luxury, self-sufficiency, independence; enjoy the fruits of your labor — you built this alone',reversed:'Self-worth tied only to wealth, living beyond means, dependence obscured by apparent independence',symbols:'Elegantly robed figure (embodied prosperity), trained falcon on arm (controlled instincts), vineyard of pentacles',keywords:['abundance','luxury','independence','success','self-sufficiency'],numMeaning:'Nine — earth nearly complete, the deep satisfaction of self-made abundance'},
+  {id:73,arcana:'Minor',suit:'Pentacles',name:'Ten of Pentacles',   number:'10',   element:'Earth',symbol:'🌱',img:WM+'pe10.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — lasting wealth, family security, and legacy. A profoundly positive material outcome.',ynRevContext:'Maybe — a family disagreement or hollow financial success may be complicating the picture.',advice:'Ten of Pentacles asks: what kind of legacy are you building? The foundation is strong enough to last. Build something worth inheriting.',upright:'Wealth, legacy, family security, long-term abundance; the vision that reaches across generations and endures',reversed:'Family disagreement over wealth, financial failure, choosing money over soul, empty legacy',symbols:'Elder with family and dogs in arch, ten pentacles in Kabbalah Tree arrangement (cosmic material completion)',keywords:['legacy','wealth','security','family','abundance'],numMeaning:'Ten — earth completing its full cycle, the legacy that endures beyond this life'},
+  {id:74,arcana:'Minor',suit:'Pentacles',name:'Page of Pentacles',  number:'Page', element:'Earth',symbol:'🌱',img:WM+'pe11.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — especially for new financial or practical ventures. Study, learn, invest in the skill.',ynRevContext:'Maybe — procrastination or practical irresponsibility is blocking what could be a real opportunity.',advice:'Page of Pentacles says: be the student. Take the class. Apply for the thing. The dedication itself is the signal that you\'re ready.',upright:'Manifestation, financial opportunity, skill development, scholarship; dedicated to learning the craft of the material',reversed:'Lack of progress, procrastination, missed learning opportunities, irresponsibility with resources',symbols:'Young figure studying a floating pentacle (focused material study), fertile fields (potential for growth)',keywords:['study','manifestation','diligence','opportunity','practicality'],numMeaning:'Page — the diligent student of material reality'},
+  {id:75,arcana:'Minor',suit:'Pentacles',name:'Knight of Pentacles',number:'Knight',element:'Earth',symbol:'🌱',img:WM+'pe12.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — slow, methodical, and absolutely reliable. Stick to the plan. Show up every day.',ynRevContext:'Maybe — a stuck routine or excessive perfectionism is causing stagnation rather than stability.',advice:'Knight of Pentacles says: you don\'t need to be exciting. You need to be consistent. Show up. Do the thing. Do it again tomorrow.',upright:'Hard work, productivity, routine, responsibility; the steady reliable one who always delivers what they promise',reversed:'Self-discipline lost, boredom, feeling stuck in routine, perfectionism becoming a block',symbols:'Knight on still horse (deliberate not rushed), pentacle examined carefully, plowed fields behind (work ready)',keywords:['responsibility','reliability','hard work','patience','routine'],numMeaning:'Knight — slow, steady, methodical expression of earth energy'},
+  {id:76,arcana:'Minor',suit:'Pentacles',name:'Queen of Pentacles', number:'Queen', element:'Earth',symbol:'🌱',img:WM+'pe13.jpg',yesno:'yes',  yesnoRev:'maybe',ynContext:'Yes — nurture it practically. Make it real. Ground the idea into the physical world.',ynRevContext:'Maybe — neglecting your own needs while nurturing others is creating an unsustainable drain.',advice:'Queen of Pentacles says: create the conditions for things to flourish. Abundance is not accidental; it\'s tended.',upright:'Practical, ambitious, nurturing, down-to-earth; she creates abundance and makes everyone feel at home',reversed:'Smothering, financially dependent, work-life imbalance, self-neglect while caring for all others',symbols:'Lush garden throne (abundance created), rabbit at feet (fertility), pentacle held lovingly (material wisdom)',keywords:['practicality','abundance','nurturing','home','resourcefulness'],numMeaning:'Queen — inward, receptive, wise feminine mastery of earth'},
+  {id:77,arcana:'Minor',suit:'Pentacles',name:'King of Pentacles',  number:'King',  element:'Earth',symbol:'🌱',img:WM+'pe14.jpg',yesno:'yes',  yesnoRev:'no',  ynContext:'Yes — financially and materially, you have the authority and means to make this succeed.',ynRevContext:'No — materialism, corruption, or financial irresponsibility is undermining what could have been built.',advice:'King of Pentacles says: lead with abundance, not scarcity. Real kings invest. Don\'t be stingy with what you know or what you have.',upright:'Abundance, prosperity, security, leadership; master of the material world who has built something truly lasting',reversed:'Financially inept, obsessed with status and wealth, corruption, materialism without soul',symbols:'Vine-covered throne (abundance grown over time), castle behind (empire built), bull motifs (Taurus/earth mastery)',keywords:['prosperity','abundance','security','leadership','mastery'],numMeaning:'King — outward, authoritative, accomplished mastery of earth'},
+
+let deck = [...CARDS];
+let filtered = [...deck];
+let current = 0;
+let flipped = false;
+let mode = 'all';
+
+function loadImage(card) {
+  const skeleton = document.getElementById('imgSkeleton');
+  const img = document.getElementById('cardImg');
+  const sym = document.getElementById('skelSym');
+  if (!skeleton || !img) return;
+  sym.textContent = card.symbol;
+  skeleton.classList.remove('hidden');
+  skeleton.style.animation = 'shimmer 1.6s infinite';
+  skeleton.style.background = '';
+  img.classList.add('hidden');
+  img.src = '';
+  const tmp = new Image();
+  tmp.onload = () => {
+    if (filtered[current]?.id !== card.id) return;
+    img.src = tmp.src;
+    img.classList.remove('hidden');
+    skeleton.classList.add('hidden');
+  };
+  tmp.onerror = () => {
+    if (filtered[current]?.id !== card.id) return;
+    skeleton.style.animation = 'none';
+    skeleton.style.background = 'linear-gradient(135deg,#1a1228,#231940)';
+    skeleton.innerHTML = `<div class="skel-sym">${card.symbol}</div><div class="skel-lbl" style="color:var(--gold);opacity:0.6">${card.name}</div>`;
+  };
+  tmp.src = card.img;
+}
+
+function renderCard() {
+  if (!filtered.length) return;
+  const c = filtered[current];
+  document.getElementById('stripNumber').textContent =
+    c.arcana === 'Major' ? `Major Arcana · ${c.number}` : `${c.suit} · ${c.number}`;
+  document.getElementById('stripName').textContent = c.name;
+  const tags = document.getElementById('cardTags');
+  tags.innerHTML = '';
+  const t = (txt, cls) => { const e = document.createElement('span'); e.className=`tag ${cls}`; e.textContent=txt; tags.appendChild(e); };
+  t(c.arcana+' Arcana','tag-arcana');
+  if (c.suit) t(c.suit,'tag-suit');
+  t(c.element,'tag-elem');
+  loadImage(c);
+  renderBack(c);
+  const pct = ((current+1)/filtered.length)*100;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressText').textContent = `${current+1} / ${filtered.length}`;
+  document.getElementById('prevBtn').disabled = current===0;
+  document.getElementById('nextBtn').disabled = current===filtered.length-1;
+}
+
+function ynBadge(val) {
+  if(!val) return '';
+  const map = {
+    'yes':   ['✓ YES',   'yn-yes'],
+    'no':    ['✗ NO',    'yn-no'],
+    'maybe': ['◈ MAYBE', 'yn-maybe'],
+  };
+  const [label, cls] = map[val] || ['◈ MAYBE','yn-maybe'];
+  return `<span class="yn-badge ${cls}">${label}</span>`;
+}
+
+function renderBack(c) {
+  const b = document.getElementById('backFace');
+  b.innerHTML = `<div class="back-card-name">${c.name}</div>`;
+  const s = (lbl,txt,cls='') => b.innerHTML += `<div><div class="back-label">${lbl}</div><div class="back-text ${cls}">${txt}</div></div>`;
+  const chips = (lbl,arr) => b.innerHTML += `<div><div class="back-label">${lbl}</div><div class="kw-chips">${arr.map(k=>`<span class="kchip">${k}</span>`).join('')}</div></div>`;
+
+  if(mode==='yesno') {
+    // Yes/No focused view
+    b.innerHTML += `
+      <div>
+        <div class="back-label">✦ Upright Answer</div>
+        <div class="yn-row">${ynBadge(c.yesno)}</div>
+        ${c.ynContext ? `<div class="yn-context" style="margin-top:0.4rem">${c.ynContext}</div>` : ''}
+      </div>
+      <div>
+        <div class="back-label">☽ Reversed Answer</div>
+        <div class="yn-row">${ynBadge(c.yesnoRev)}</div>
+        ${c.ynRevContext ? `<div class="yn-context" style="margin-top:0.4rem">${c.ynRevContext}</div>` : ''}
+      </div>`;
+    if(c.advice) s('◎ Reading Advice', c.advice, 'advice-text');
+    chips('◦ Keywords', c.keywords);
+    return;
+  }
+
+  if(mode==='all') {
+    // Show yes/no pill inline at the top
+    b.innerHTML += `<div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;margin-bottom:0.2rem">
+      <span class="yn-label">UPRIGHT</span>${ynBadge(c.yesno)}
+      <span class="yn-label" style="margin-left:0.3rem">REVERSED</span>${ynBadge(c.yesnoRev)}
+    </div>`;
+  }
+
+  if(mode==='all'||mode==='upright')  s('✦ Upright', c.upright);
+  if(mode==='all'||mode==='reversed') s('☽ Reversed', c.reversed, 'rev');
+  if(mode==='all'||mode==='symbols')  s('◈ Symbols',  c.symbols);
+  if(mode==='all') {
+    if(c.advice) s('💡 Advice', c.advice, 'advice-text');
+    s('◎ Numerology', c.numMeaning);
+    chips('◦ Keywords', c.keywords);
+  }
+}
+
+function flipCard(){ flipped=!flipped; document.getElementById('card3d').classList.toggle('flipped',flipped); }
+function navigate(d){ current=Math.max(0,Math.min(filtered.length-1,current+d)); flipped=false; document.getElementById('card3d').classList.remove('flipped'); setTimeout(renderCard,30); }
+function shuffle(){ for(let i=filtered.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[filtered[i],filtered[j]]=[filtered[j],filtered[i]];} current=0;flipped=false;document.getElementById('card3d').classList.remove('flipped');renderCard(); }
+function setMode(m,btn){ mode=m; document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); if(filtered[current])renderBack(filtered[current]); }
+
+function buildFilters(){
+  const row=document.getElementById('filterRow');
+  ['All','Major','Wands','Cups','Swords','Pentacles'].forEach(f=>{
+    const btn=document.createElement('button');
+    btn.className='filter-btn'+(f==='All'?' active':'');
+    btn.textContent=f;
+    btn.onclick=()=>{
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      filtered=f==='All'?[...deck]:deck.filter(c=>c.arcana===f||c.suit===f);
+      current=0;flipped=false;document.getElementById('card3d').classList.remove('flipped');renderCard();
+    };
+    row.appendChild(btn);
+  });
+}
+
+buildFilters();
+renderCard();
+</script>
+</body>
+</html>

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tarot Reference Sheet & Worksheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: #f8f3ec;
+    color: #2a1f0f;
+    line-height: 1.5;
+  }
+
+  /* NAV TABS */
+  .tab-nav {
+    background: #1c1028;
+    display: flex;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid #c9a84c;
+  }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: #8070a8;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    padding: 0.9rem 1.6rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+  }
+  .tab-btn:hover { color: #c9a84c; }
+  .tab-btn.active { color: #c9a84c; border-bottom-color: #c9a84c; }
+
+  .tab-pane { display: none; padding: 2rem; max-width: 1100px; margin: 0 auto; }
+  .tab-pane.active { display: block; }
+
+  /* PRINT BUTTON */
+  .print-btn {
+    display: inline-block;
+    background: #1c1028;
+    color: #c9a84c;
+    border: 1px solid #c9a84c;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    padding: 0.5rem 1.4rem;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-bottom: 1.5rem;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .print-btn:hover { background: #c9a84c; color: #1c1028; }
+
+  /* REFERENCE SHEET STYLES */
+  h1 {
+    font-family: 'Cinzel', serif;
+    color: #4B2D8A;
+    font-size: 1.7rem;
+    margin-bottom: 0.3rem;
+    border-bottom: 3px solid #c9a84c;
+    padding-bottom: 0.4rem;
+  }
+  h2 {
+    font-family: 'Cinzel', serif;
+    color: #4B2D8A;
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.7rem;
+  }
+  h3 {
+    font-family: 'Cinzel', serif;
+    color: #8B4513;
+    font-size: 0.9rem;
+    margin: 1rem 0 0.4rem;
+    letter-spacing: 0.06em;
+  }
+
+  .subtitle { color: #666; font-style: italic; font-size: 1rem; margin-bottom: 1.5rem; }
+
+  /* Grid layouts */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+
+  /* Element cards */
+  .elem-card {
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid;
+  }
+  .elem-fire { background: #fff8e8; border-color: #c9a84c; }
+  .elem-water { background: #e8f0ff; border-color: #4a7ab5; }
+  .elem-air { background: #e8fff0; border-color: #4a8b5a; }
+  .elem-earth { background: #f5ede0; border-color: #8b5a2a; }
+  .elem-card strong { font-family: 'Cinzel', serif; font-size: 0.9rem; display: block; margin-bottom: 0.4rem; }
+  .elem-card p { font-size: 0.85rem; color: #444; }
+
+  /* Quick ref table */
+  .ref-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .ref-table th { background: #1c1028; color: #c9a84c; font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.08em; padding: 0.5rem 0.7rem; text-align: left; }
+  .ref-table td { padding: 0.45rem 0.7rem; border-bottom: 1px solid #e0d0c0; vertical-align: top; }
+  .ref-table tr:nth-child(even) td { background: #faf4ec; }
+  .ref-table tr:hover td { background: #f0e8d8; }
+  .card-name { font-weight: 600; color: #4B2D8A; }
+  .upright-kw { color: #1A6B65; }
+  .reversed-kw { color: #8B2A3A; font-style: italic; }
+
+  /* Numerology box */
+  .num-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
+  .num-item {
+    background: white;
+    border: 1px solid #c9a84c;
+    border-radius: 6px;
+    padding: 0.6rem;
+    text-align: center;
+  }
+  .num-item .num { font-family: 'Cinzel', serif; font-size: 1.3rem; color: #c9a84c; font-weight: 700; }
+  .num-item .meaning { font-size: 0.78rem; color: #333; margin-top: 0.2rem; line-height: 1.3; }
+
+  /* WORKSHEET STYLES */
+  .ws-section {
+    background: white;
+    border: 1px solid #c9a84c;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .ws-section h2 { font-family: 'Cinzel', serif; color: #4B2D8A; font-size: 1rem; margin-bottom: 1rem; border-bottom: 1px solid #e0d0c0; padding-bottom: 0.5rem; }
+  .field-label { font-size: 0.82rem; color: #555; font-style: italic; margin-bottom: 0.3rem; }
+  .write-line {
+    border: none;
+    border-bottom: 1px solid #c9a84c;
+    width: 100%;
+    padding: 0.3rem 0;
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    background: transparent;
+    outline: none;
+    color: #2a1f0f;
+    margin-bottom: 0.8rem;
+  }
+  .write-line:focus { border-bottom-color: #4B2D8A; }
+  .write-area {
+    border: 1px solid #c9a84c;
+    border-radius: 6px;
+    width: 100%;
+    padding: 0.7rem;
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.95rem;
+    background: #fffcf5;
+    outline: none;
+    color: #2a1f0f;
+    resize: vertical;
+    min-height: 80px;
+    margin-bottom: 0.8rem;
+  }
+  .write-area:focus { border-color: #4B2D8A; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+  .spread-pos {
+    background: #faf4ec;
+    border: 1px dashed #c9a84c;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .spread-pos .pos-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    color: #c9a84c;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+  .pos-meaning { font-size: 0.8rem; color: #888; font-style: italic; margin-bottom: 0.6rem; }
+  .card-draw-box {
+    background: white;
+    border: 1px solid #8B6914;
+    border-radius: 6px;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.82rem;
+    color: #888;
+    min-height: 36px;
+    text-align: center;
+  }
+  .rating-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+  .rating-label { font-size: 0.85rem; width: 180px; flex-shrink: 0; }
+  .star-rating { display: flex; gap: 0.3rem; }
+  .star { font-size: 1.2rem; color: #e0d0c0; cursor: pointer; transition: color 0.15s; }
+  .star:hover, .star.lit { color: #c9a84c; }
+
+  /* ── Site-wide nav ── */
+  .site-nav {
+    width: 100%;
+    background: #1c1028;
+    border-bottom: 2px solid #c9a84c;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    padding: 0 1rem;
+  }
+  .site-nav a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: #8070a8;
+    text-decoration: none;
+    padding: 0.65rem 1.2rem;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-bottom: -2px;
+  }
+  .site-nav a:hover { color: #c9a84c; }
+  .site-nav a.active { color: #e8cc7a; border-bottom-color: #c9a84c; }
+  .site-nav .nav-divider { color: rgba(201,168,76,0.2); font-size: 0.8rem; padding: 0 0.15rem; user-select: none; }
+  .site-nav .nav-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    background: linear-gradient(135deg, #c9a84c, #a78bca);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-right: auto;
+    padding: 0.65rem 0;
+  }
+
+  /* Printable */
+  @media print {
+    .site-nav, .tab-nav, .print-btn { display: none; }
+    .tab-pane { display: block !important; page-break-after: always; padding: 1cm; }
+    .tab-pane:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <span class="nav-brand">✦ TAROT STUDY</span>
+  <a href="index.html">🃏 Flashcards</a>
+  <span class="nav-divider">·</span>
+  <a href="journey.html">✨ The Fool's Journey</a>
+  <span class="nav-divider">·</span>
+  <a href="worksheet.html" class="active">📋 Reference & Worksheet</a>
+</nav>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('reference')">📋 Quick Reference Sheet</button>
+  <button class="tab-btn" onclick="showTab('numerology')">🔢 Numerology Guide</button>
+  <button class="tab-btn" onclick="showTab('worksheet')">📝 Study Worksheet</button>
+</div>
+
+<!-- REFERENCE SHEET -->
+<div class="tab-pane active" id="tab-reference">
+  <button class="print-btn" onclick="window.print()">⊕ Print This Sheet</button>
+  <h1>✦ Tarot Quick Reference</h1>
+  <p class="subtitle">All 78 cards — keywords at a glance — upright & reversed</p>
+
+  <div class="grid-4" style="margin-bottom:1.5rem">
+    <div class="elem-card elem-fire">
+      <strong>🔥 Wands · Fire</strong>
+      <p>Action, passion, career, creativity, ambition, will, spiritual force</p>
+    </div>
+    <div class="elem-card elem-water">
+      <strong>💧 Cups · Water</strong>
+      <p>Emotion, intuition, relationships, dreams, the inner world, soul</p>
+    </div>
+    <div class="elem-card elem-air">
+      <strong>💨 Swords · Air</strong>
+      <p>Thought, truth, conflict, communication, intellect, clarity, pain</p>
+    </div>
+    <div class="elem-card elem-earth">
+      <strong>🌱 Pentacles · Earth</strong>
+      <p>Body, money, work, material reality, health, home, legacy</p>
+    </div>
+  </div>
+
+  <h2>✦ Major Arcana — Quick Reference</h2>
+  <table class="ref-table">
+    <thead><tr><th>Card</th><th>No.</th><th>Element</th><th>Upright Keywords</th><th>Reversed Keywords</th><th>Key Symbol</th></tr></thead>
+    <tbody>
+      <tr><td class="card-name">The Fool</td><td>0</td><td>Air</td><td class="upright-kw">Beginnings, innocence, adventure, leap of faith</td><td class="reversed-kw">Recklessness, naivety, holding back</td><td>Cliff edge + dog</td></tr>
+      <tr><td class="card-name">The Magician</td><td>I</td><td>Mercury/Air</td><td class="upright-kw">Manifestation, willpower, skill, resourcefulness</td><td class="reversed-kw">Manipulation, untapped talent, trickery</td><td>∞ above head</td></tr>
+      <tr><td class="card-name">High Priestess</td><td>II</td><td>Moon/Water</td><td class="upright-kw">Intuition, mystery, subconscious, inner wisdom</td><td class="reversed-kw">Secrets, disconnected intuition, hidden info</td><td>Pillars B & J</td></tr>
+      <tr><td class="card-name">The Empress</td><td>III</td><td>Venus/Earth</td><td class="upright-kw">Abundance, fertility, nature, nurturing, beauty</td><td class="reversed-kw">Creative block, smothering, neglect of self</td><td>Venus symbol</td></tr>
+      <tr><td class="card-name">The Emperor</td><td>IV</td><td>Aries/Fire</td><td class="upright-kw">Authority, structure, stability, fatherhood</td><td class="reversed-kw">Tyranny, rigidity, domination, control</td><td>Ram throne</td></tr>
+      <tr><td class="card-name">The Hierophant</td><td>V</td><td>Taurus/Earth</td><td class="upright-kw">Tradition, spiritual wisdom, institutions, conformity</td><td class="reversed-kw">Challenging orthodoxy, personal belief, freedom</td><td>Crossed keys</td></tr>
+      <tr><td class="card-name">The Lovers</td><td>VI</td><td>Gemini/Air</td><td class="upright-kw">Love, union, choices, values alignment, harmony</td><td class="reversed-kw">Disharmony, bad choices, misaligned values</td><td>Angel above couple</td></tr>
+      <tr><td class="card-name">The Chariot</td><td>VII</td><td>Cancer/Water</td><td class="upright-kw">Willpower, control, victory, determination</td><td class="reversed-kw">Lost direction, aggression, lack of discipline</td><td>Two sphinxes</td></tr>
+      <tr><td class="card-name">Strength</td><td>VIII</td><td>Leo/Fire</td><td class="upright-kw">Inner strength, courage, patience, compassion</td><td class="reversed-kw">Self-doubt, weakness, fear behind bravado</td><td>Woman + lion</td></tr>
+      <tr><td class="card-name">The Hermit</td><td>IX</td><td>Virgo/Earth</td><td class="upright-kw">Solitude, introspection, soul-searching, inner guide</td><td class="reversed-kw">Isolation, refusing guidance, lost in darkness</td><td>Lantern on mountain</td></tr>
+      <tr><td class="card-name">Wheel of Fortune</td><td>X</td><td>Jupiter/Fire</td><td class="upright-kw">Luck, karma, cycles, destiny, turning point</td><td class="reversed-kw">Bad luck, resisting change, clinging to past</td><td>TORA wheel</td></tr>
+      <tr><td class="card-name">Justice</td><td>XI</td><td>Libra/Air</td><td class="upright-kw">Fairness, truth, cause and effect, accountability</td><td class="reversed-kw">Unfairness, dishonesty, refused accountability</td><td>Scales + sword</td></tr>
+      <tr><td class="card-name">The Hanged Man</td><td>XII</td><td>Neptune/Water</td><td class="upright-kw">Surrender, pause, new perspective, sacrifice</td><td class="reversed-kw">Stalling, false surrender, martyrdom</td><td>Inverted figure + halo</td></tr>
+      <tr><td class="card-name">Death</td><td>XIII</td><td>Scorpio/Water</td><td class="upright-kw">Transformation, endings, change, transition, rebirth</td><td class="reversed-kw">Resistance to change, stagnation, clinging</td><td>White horse + rising sun</td></tr>
+      <tr><td class="card-name">Temperance</td><td>XIV</td><td>Sagittarius/Fire</td><td class="upright-kw">Balance, moderation, patience, alchemy, purpose</td><td class="reversed-kw">Imbalance, excess, purpose lost</td><td>Angel pouring cups</td></tr>
+      <tr><td class="card-name">The Devil</td><td>XV</td><td>Capricorn/Earth</td><td class="upright-kw">Shadow, bondage, addiction, attachment, materialism</td><td class="reversed-kw">Freedom found, releasing limiting beliefs</td><td>Loose chains on couple</td></tr>
+      <tr><td class="card-name">The Tower</td><td>XVI</td><td>Mars/Fire</td><td class="upright-kw">Sudden change, upheaval, revelation, destruction of false</td><td class="reversed-kw">Fearing upheaval, delaying the inevitable</td><td>Lightning bolt</td></tr>
+      <tr><td class="card-name">The Star</td><td>XVII</td><td>Aquarius/Air</td><td class="upright-kw">Hope, faith, renewal, serenity, healing</td><td class="reversed-kw">Despair, lack of faith, inner light dimmed</td><td>Eight-pointed star</td></tr>
+      <tr><td class="card-name">The Moon</td><td>XVIII</td><td>Pisces/Water</td><td class="upright-kw">Illusion, fear, unconscious, dreams, intuition</td><td class="reversed-kw">Confusion clearing, fears releasing</td><td>Dog + wolf + crayfish</td></tr>
+      <tr><td class="card-name">The Sun</td><td>XIX</td><td>Sun/Fire</td><td class="upright-kw">Joy, success, vitality, clarity, optimism</td><td class="reversed-kw">Joy blocked, pessimism, inner child suppressed</td><td>Child on white horse</td></tr>
+      <tr><td class="card-name">Judgement</td><td>XX</td><td>Pluto/Fire</td><td class="upright-kw">Awakening, reckoning, absolution, higher calling</td><td class="reversed-kw">Refusing the call, self-doubt, not learning</td><td>Angel's trumpet</td></tr>
+      <tr><td class="card-name">The World</td><td>XXI</td><td>Saturn/Earth</td><td class="upright-kw">Completion, wholeness, accomplishment, integration</td><td class="reversed-kw">Incomplete cycles, shortcuts taken</td><td>Laurel oval, dancing figure</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:2rem">🔥 Wands Quick Reference</h2>
+  <table class="ref-table">
+    <thead><tr><th>Card</th><th>Upright</th><th>Reversed</th></tr></thead>
+    <tbody>
+      <tr><td class="card-name">Ace of Wands</td><td class="upright-kw">Inspiration, new beginnings, creative spark, potential</td><td class="reversed-kw">Delays, creative block, lost motivation</td></tr>
+      <tr><td class="card-name">Two of Wands</td><td class="upright-kw">Planning, decisions, foresight, expansion</td><td class="reversed-kw">Fear of unknown, playing safe, no follow-through</td></tr>
+      <tr><td class="card-name">Three of Wands</td><td class="upright-kw">Progress, overseas expansion, watching plans unfold</td><td class="reversed-kw">Playing small, delays, obstacles to vision</td></tr>
+      <tr><td class="card-name">Four of Wands</td><td class="upright-kw">Celebration, harmony, homecoming, milestone</td><td class="reversed-kw">Transition, lack of home support, private joy</td></tr>
+      <tr><td class="card-name">Five of Wands</td><td class="upright-kw">Conflict, competition, creative tension, debate</td><td class="reversed-kw">Avoided conflict, inner turmoil, destructive rivalry</td></tr>
+      <tr><td class="card-name">Six of Wands</td><td class="upright-kw">Victory, recognition, confidence, success</td><td class="reversed-kw">Fall from grace, ego, public failure, pride</td></tr>
+      <tr><td class="card-name">Seven of Wands</td><td class="upright-kw">Perseverance, defense, holding ground, challenge</td><td class="reversed-kw">Overwhelmed, giving up, exhaustion</td></tr>
+      <tr><td class="card-name">Eight of Wands</td><td class="upright-kw">Speed, action, swift movement, messages</td><td class="reversed-kw">Delays, frustration, missed windows</td></tr>
+      <tr><td class="card-name">Nine of Wands</td><td class="upright-kw">Resilience, last stand, courage, almost there</td><td class="reversed-kw">Exhaustion, paranoia, walls too high, giving up</td></tr>
+      <tr><td class="card-name">Ten of Wands</td><td class="upright-kw">Burden, responsibility, hard work, completion ahead</td><td class="reversed-kw">Delegation needed, resentment, releasing load</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:1.5rem">💧 Cups Quick Reference</h2>
+  <table class="ref-table">
+    <thead><tr><th>Card</th><th>Upright</th><th>Reversed</th></tr></thead>
+    <tbody>
+      <tr><td class="card-name">Ace of Cups</td><td class="upright-kw">New love, emotion, creativity, compassion, overflow</td><td class="reversed-kw">Blocked emotion, self-love needed, closed heart</td></tr>
+      <tr><td class="card-name">Two of Cups</td><td class="upright-kw">Partnership, union, mutual attraction, connection</td><td class="reversed-kw">Imbalance, broken communication, one-sided love</td></tr>
+      <tr><td class="card-name">Three of Cups</td><td class="upright-kw">Celebration, friendship, community, sisterhood</td><td class="reversed-kw">Overindulgence, gossip, isolation, cliques</td></tr>
+      <tr><td class="card-name">Four of Cups</td><td class="upright-kw">Apathy, contemplation, reevaluation, introspection</td><td class="reversed-kw">Re-engagement, seeing what was missed, awareness</td></tr>
+      <tr><td class="card-name">Five of Cups</td><td class="upright-kw">Grief, loss, regret, mourning, disappointment</td><td class="reversed-kw">Acceptance, moving on, what remains</td></tr>
+      <tr><td class="card-name">Six of Cups</td><td class="upright-kw">Nostalgia, childhood, memories, innocence</td><td class="reversed-kw">Stuck in past, over-romanticizing, letting go</td></tr>
+      <tr><td class="card-name">Seven of Cups</td><td class="upright-kw">Illusion, fantasy, wishful thinking, many choices</td><td class="reversed-kw">Clarity emerging, real choice made, grounded</td></tr>
+      <tr><td class="card-name">Eight of Cups</td><td class="upright-kw">Walking away, seeking meaning, spiritual journey</td><td class="reversed-kw">Fear of moving on, returning to the wrong thing</td></tr>
+      <tr><td class="card-name">Nine of Cups</td><td class="upright-kw">Contentment, wish fulfilled, satisfaction, gratitude</td><td class="reversed-kw">Inner happiness missing, material contentment hollow</td></tr>
+      <tr><td class="card-name">Ten of Cups</td><td class="upright-kw">Divine love, family harmony, fulfillment, alignment</td><td class="reversed-kw">Broken home, false happiness, misaligned values</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:1.5rem">💨 Swords Quick Reference</h2>
+  <table class="ref-table">
+    <thead><tr><th>Card</th><th>Upright</th><th>Reversed</th></tr></thead>
+    <tbody>
+      <tr><td class="card-name">Ace of Swords</td><td class="upright-kw">Clarity, breakthrough, sharp mind, truth</td><td class="reversed-kw">Confusion, misused intellect, chaos</td></tr>
+      <tr><td class="card-name">Two of Swords</td><td class="upright-kw">Stalemate, indecision, blocked emotion, avoidance</td><td class="reversed-kw">Forced choice, overwhelm, information released</td></tr>
+      <tr><td class="card-name">Three of Swords</td><td class="upright-kw">Heartbreak, grief, sorrow, painful truth</td><td class="reversed-kw">Healing, negative self-talk, optimism returning</td></tr>
+      <tr><td class="card-name">Four of Swords</td><td class="upright-kw">Rest, recuperation, contemplation, strategic pause</td><td class="reversed-kw">Restlessness, burnout, forced rest</td></tr>
+      <tr><td class="card-name">Five of Swords</td><td class="upright-kw">Conflict, hollow victory, winning at a cost</td><td class="reversed-kw">Reconciliation, releasing need to be right</td></tr>
+      <tr><td class="card-name">Six of Swords</td><td class="upright-kw">Transition, moving on, calmer waters ahead</td><td class="reversed-kw">Resisting change, unfinished business</td></tr>
+      <tr><td class="card-name">Seven of Swords</td><td class="upright-kw">Strategy, cunning, solo action, deception</td><td class="reversed-kw">Coming clean, conscience awakening, caught</td></tr>
+      <tr><td class="card-name">Eight of Swords</td><td class="upright-kw">Mental restriction, victim mindset, self-imposed limits</td><td class="reversed-kw">Freedom realized, self-acceptance, new perspective</td></tr>
+      <tr><td class="card-name">Nine of Swords</td><td class="upright-kw">Anxiety, worry, fear, nightmares, despair</td><td class="reversed-kw">Hope emerging, reaching out, the worst over</td></tr>
+      <tr><td class="card-name">Ten of Swords</td><td class="upright-kw">Painful ending, rock bottom, betrayal, release</td><td class="reversed-kw">Recovery beginning, refusing to release what ended</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:1.5rem">🌱 Pentacles Quick Reference</h2>
+  <table class="ref-table">
+    <thead><tr><th>Card</th><th>Upright</th><th>Reversed</th></tr></thead>
+    <tbody>
+      <tr><td class="card-name">Ace of Pentacles</td><td class="upright-kw">New financial opportunity, manifestation, security</td><td class="reversed-kw">Missed opportunity, scarcity mindset</td></tr>
+      <tr><td class="card-name">Two of Pentacles</td><td class="upright-kw">Balance, juggling, adaptability, time management</td><td class="reversed-kw">Overwhelmed, disorganized, dropping balls</td></tr>
+      <tr><td class="card-name">Three of Pentacles</td><td class="upright-kw">Teamwork, collaboration, skill, mastery developing</td><td class="reversed-kw">Disharmony, lack of focus, working in isolation</td></tr>
+      <tr><td class="card-name">Four of Pentacles</td><td class="upright-kw">Security, stability, saving, holding on</td><td class="reversed-kw">Generosity opening, releasing control</td></tr>
+      <tr><td class="card-name">Five of Pentacles</td><td class="upright-kw">Hardship, poverty, isolation, left out in cold</td><td class="reversed-kw">Recovery, inner resources found, help seen</td></tr>
+      <tr><td class="card-name">Six of Pentacles</td><td class="upright-kw">Generosity, charity, giving and receiving, balance</td><td class="reversed-kw">Strings attached, power imbalance, self-care first</td></tr>
+      <tr><td class="card-name">Seven of Pentacles</td><td class="upright-kw">Patience, long-term view, assessment, perseverance</td><td class="reversed-kw">Impatience, short-term vision, effort wasted</td></tr>
+      <tr><td class="card-name">Eight of Pentacles</td><td class="upright-kw">Diligence, mastery, craftsmanship, dedication</td><td class="reversed-kw">Perfectionism, lack of focus, misdirected effort</td></tr>
+      <tr><td class="card-name">Nine of Pentacles</td><td class="upright-kw">Luxury, abundance, independence, self-sufficiency</td><td class="reversed-kw">Self-worth tied to wealth, living beyond means</td></tr>
+      <tr><td class="card-name">Ten of Pentacles</td><td class="upright-kw">Legacy, wealth, family security, long-term success</td><td class="reversed-kw">Financial failure, empty legacy, money over soul</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- NUMEROLOGY GUIDE -->
+<div class="tab-pane" id="tab-numerology">
+  <h1>🔢 Tarot Numerology Guide</h1>
+  <p class="subtitle">Numbers carry meaning across every suit — understand the number and you understand the card's stage</p>
+
+  <div class="num-grid" style="margin-bottom:2rem">
+    <div class="num-item"><div class="num">0</div><div class="meaning">The Fool · Pure potential, the void, everything and nothing</div></div>
+    <div class="num-item"><div class="num">1</div><div class="meaning">Aces · New beginnings, seed energy, pure potential of the suit</div></div>
+    <div class="num-item"><div class="num">2</div><div class="meaning">Duality, choice, partnership, the first meeting of opposites</div></div>
+    <div class="num-item"><div class="num">3</div><div class="meaning">First results, creativity, growth, the fruit of union</div></div>
+    <div class="num-item"><div class="num">4</div><div class="meaning">Stability, structure, foundations, consolidation</div></div>
+    <div class="num-item"><div class="num">5</div><div class="meaning">Disruption, challenge, change, the test of stability</div></div>
+    <div class="num-item"><div class="num">6</div><div class="meaning">Harmony, balance restored, giving and receiving, homecoming</div></div>
+    <div class="num-item"><div class="num">7</div><div class="meaning">Mystery, spiritual quest, introspection, the inner journey</div></div>
+    <div class="num-item"><div class="num">8</div><div class="meaning">Power, karma, cycles, movement, mastery through repetition</div></div>
+    <div class="num-item"><div class="num">9</div><div class="meaning">Near completion, wisdom, the final test before the end</div></div>
+    <div class="num-item"><div class="num">10</div><div class="meaning">Completion of cycle, transition, maximum expression</div></div>
+    <div class="num-item"><div class="num">Pages</div><div class="meaning">New energy, messages, the student, fresh exploration</div></div>
+    <div class="num-item"><div class="num">Knights</div><div class="meaning">Action, questing, movement, extreme expression of the element</div></div>
+    <div class="num-item"><div class="num">Queens</div><div class="meaning">Inner mastery, receptive power, the wise feminine force</div></div>
+    <div class="num-item"><div class="num">Kings</div><div class="meaning">Outer mastery, active authority, the accomplished force</div></div>
+  </div>
+
+  <h2>Reading Numerology Across Suits</h2>
+  <p style="font-size:0.95rem; margin-bottom:1rem; color:#444;">Each number carries the same <em>stage of a journey</em> across all four elements. The <strong>number</strong> tells you <em>where</em> you are in the process. The <strong>suit</strong> tells you <em>which domain of life</em> that stage is playing out in.</p>
+
+  <table class="ref-table">
+    <thead><tr><th>No.</th><th>Theme</th><th>Wands (Fire)</th><th>Cups (Water)</th><th>Swords (Air)</th><th>Pentacles (Earth)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1/Ace</strong></td><td>Pure seed</td><td>Creative spark</td><td>Emotional opening</td><td>Mental clarity</td><td>Material opportunity</td></tr>
+      <tr><td><strong>2</strong></td><td>First choice</td><td>Planning ahead</td><td>Partnership forming</td><td>Stalemate, avoidance</td><td>Juggling, balancing</td></tr>
+      <tr><td><strong>3</strong></td><td>First results</td><td>Expansion, ships in</td><td>Celebration, friendship</td><td>Heartbreak named</td><td>Collaboration working</td></tr>
+      <tr><td><strong>4</strong></td><td>Stability</td><td>Celebration milestone</td><td>Apathy, withdrawal</td><td>Strategic rest</td><td>Security, holding on</td></tr>
+      <tr><td><strong>5</strong></td><td>Disruption</td><td>Conflict, competition</td><td>Loss, grief</td><td>Hollow victory</td><td>Poverty, hardship</td></tr>
+      <tr><td><strong>6</strong></td><td>Harmony restored</td><td>Victory, recognition</td><td>Nostalgia, sweetness</td><td>Transition, passage</td><td>Generosity, giving</td></tr>
+      <tr><td><strong>7</strong></td><td>Quest, mystery</td><td>Perseverance, defense</td><td>Illusion, fantasy</td><td>Strategy, cunning</td><td>Patience, long view</td></tr>
+      <tr><td><strong>8</strong></td><td>Power, momentum</td><td>Speed, swift action</td><td>Walking away</td><td>Mental imprisonment</td><td>Mastery, diligence</td></tr>
+      <tr><td><strong>9</strong></td><td>Near completion</td><td>Last stand, resilience</td><td>Wish fulfilled</td><td>Anxiety, dark night</td><td>Luxury, independence</td></tr>
+      <tr><td><strong>10</strong></td><td>Full cycle</td><td>Burden, completion</td><td>Divine love, family</td><td>Rock bottom, ending</td><td>Legacy, dynasty</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- WORKSHEET -->
+<div class="tab-pane" id="tab-worksheet">
+  <h1>📝 Tarot Study Worksheet</h1>
+  <p class="subtitle">Use daily for card pulls, spreads, and reflections · All fields are fillable</p>
+
+  <div class="ws-section">
+    <h2>✦ Daily Card Pull</h2>
+    <div class="grid-2">
+      <div>
+        <p class="field-label">Date</p>
+        <input class="write-line" type="text" placeholder="e.g. March 5, 2026">
+        <p class="field-label">Card Drawn</p>
+        <input class="write-line" type="text" placeholder="Card name">
+        <p class="field-label">Suit / Arcana</p>
+        <input class="write-line" type="text" placeholder="Major / Wands / Cups / Swords / Pentacles">
+        <p class="field-label">Upright or Reversed?</p>
+        <input class="write-line" type="text" placeholder="Upright / Reversed">
+      </div>
+      <div>
+        <p class="field-label">Element & Number/Rank</p>
+        <input class="write-line" type="text" placeholder="e.g. Fire · 7">
+        <p class="field-label">Key symbol you noticed first</p>
+        <input class="write-line" type="text" placeholder="What jumped out at you?">
+        <p class="field-label">Moon Phase (optional)</p>
+        <input class="write-line" type="text" placeholder="e.g. Waxing Gibbous">
+        <p class="field-label">Energy / Mood Today</p>
+        <input class="write-line" type="text" placeholder="In a few words...">
+      </div>
+    </div>
+    <p class="field-label">Upright meaning as you recall it (without looking)</p>
+    <textarea class="write-area" placeholder="Write what you remember about this card's upright meaning..."></textarea>
+    <p class="field-label">Reversed meaning as you recall it (without looking)</p>
+    <textarea class="write-area" placeholder="Write what you remember about this card's reversed meaning..."></textarea>
+    <p class="field-label">How does this card apply to today?</p>
+    <textarea class="write-area" style="min-height:100px" placeholder="Be specific — what in your current life or energy does this reflect?"></textarea>
+    <p class="field-label">What is this card asking you to do, release, or notice?</p>
+    <textarea class="write-area" placeholder="The invitation or message for today..."></textarea>
+  </div>
+
+  <div class="ws-section">
+    <h2>☽ Three-Card Spread — Past · Present · Future</h2>
+    <div class="grid-3" style="margin-bottom:1rem">
+      <div class="spread-pos">
+        <div class="pos-label">POSITION 1</div>
+        <div class="pos-meaning">Past — what led here</div>
+        <div class="card-draw-box">Card drawn</div>
+        <input class="write-line" type="text" placeholder="Card name">
+        <input class="write-line" type="text" placeholder="Upright / Reversed">
+      </div>
+      <div class="spread-pos">
+        <div class="pos-label">POSITION 2</div>
+        <div class="pos-meaning">Present — what is happening now</div>
+        <div class="card-draw-box">Card drawn</div>
+        <input class="write-line" type="text" placeholder="Card name">
+        <input class="write-line" type="text" placeholder="Upright / Reversed">
+      </div>
+      <div class="spread-pos">
+        <div class="pos-label">POSITION 3</div>
+        <div class="pos-meaning">Future — where this is heading</div>
+        <div class="card-draw-box">Card drawn</div>
+        <input class="write-line" type="text" placeholder="Card name">
+        <input class="write-line" type="text" placeholder="Upright / Reversed">
+      </div>
+    </div>
+    <p class="field-label">What theme or story do you see across all three cards?</p>
+    <textarea class="write-area" placeholder="How do the three cards speak to each other as a narrative?"></textarea>
+    <p class="field-label">What element(s) dominate this spread and what does that mean?</p>
+    <textarea class="write-area" placeholder="Note which suits/elements appear and what that emphasis might be saying..."></textarea>
+    <p class="field-label">What does this spread say about your current life question?</p>
+    <textarea class="write-area" style="min-height:100px" placeholder="Your reading and interpretation..."></textarea>
+  </div>
+
+  <div class="ws-section">
+    <h2>◈ Card Deep Dive — Symbolism Meditation</h2>
+    <p class="field-label">Card chosen for deep study</p>
+    <input class="write-line" type="text" placeholder="Card name">
+    <p class="field-label">Describe everything you see in the card (without using the guidebook)</p>
+    <textarea class="write-area" style="min-height:120px" placeholder="What figures, colors, objects, animals, landscapes do you see? What is the figure's posture and expression?"></textarea>
+    <p class="field-label">What does each symbol mean to you personally?</p>
+    <textarea class="write-area" style="min-height:100px" placeholder="List 3–5 symbols and your personal interpretation of each..."></textarea>
+    <p class="field-label">What does the traditional symbolism say vs. your personal reading?</p>
+    <textarea class="write-area" placeholder="Where do your instincts align with tradition? Where do they diverge?"></textarea>
+    <p class="field-label">If this card is a character, what are they saying to you?</p>
+    <textarea class="write-area" placeholder="Write a message or dialogue from this card's perspective..."></textarea>
+  </div>
+
+  <div class="ws-section">
+    <h2>⬥ Self-Assessment — Confidence Ratings</h2>
+    <p style="font-size:0.85rem; color:#666; margin-bottom:1rem; font-style:italic">Rate your current confidence with each area from 1–5 by clicking the stars</p>
+    <div id="ratingArea"></div>
+  </div>
+
+  <div class="ws-section">
+    <h2>✦ Weekly Reflection</h2>
+    <p class="field-label">Cards that appeared most this week</p>
+    <input class="write-line" type="text" placeholder="List any recurring cards or themes...">
+    <p class="field-label">Suit(s) that dominated</p>
+    <input class="write-line" type="text" placeholder="Which element has been most present?">
+    <p class="field-label">What has the tarot been trying to show you this week?</p>
+    <textarea class="write-area" style="min-height:100px" placeholder="A theme, pattern, or message emerging across your daily pulls..."></textarea>
+    <p class="field-label">What cards do you want to study more deeply next week?</p>
+    <textarea class="write-area" placeholder="Cards you want to spend more time with..."></textarea>
+    <p class="field-label">One insight from this week to carry forward</p>
+    <input class="write-line" type="text" placeholder="A single sentence or phrase...">
+  </div>
+</div>
+
+<script>
+function showTab(id) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// Star ratings
+const ratingItems = [
+  "Major Arcana — Upright meanings",
+  "Major Arcana — Reversed meanings",
+  "Major Arcana — Symbolism",
+  "Wands suit (all 14 cards)",
+  "Cups suit (all 14 cards)",
+  "Swords suit (all 14 cards)",
+  "Pentacles suit (all 14 cards)",
+  "Numerology across all suits",
+  "Elemental associations",
+  "Court cards (Pages/Knights/Queens/Kings)",
+  "Reading multi-card spreads",
+];
+
+const ratingArea = document.getElementById('ratingArea');
+ratingItems.forEach(item => {
+  const row = document.createElement('div');
+  row.className = 'rating-row';
+  const label = document.createElement('span');
+  label.className = 'rating-label';
+  label.textContent = item;
+  const stars = document.createElement('div');
+  stars.className = 'star-rating';
+  for (let i = 1; i <= 5; i++) {
+    const s = document.createElement('span');
+    s.className = 'star';
+    s.textContent = '★';
+    s.dataset.val = i;
+    s.onclick = function() {
+      const val = parseInt(this.dataset.val);
+      this.parentNode.querySelectorAll('.star').forEach(st => {
+        st.classList.toggle('lit', parseInt(st.dataset.val) <= val);
+      });
+    };
+    stars.appendChild(s);
+  }
+  row.appendChild(label);
+  row.appendChild(stars);
+  ratingArea.appendChild(row);
+});
+</script>
+
+<footer style="
+  width:100%; text-align:center; padding: 1.5rem 1rem 2rem;
+  font-family:'Crimson Pro',Georgia,serif; font-size:0.8rem;
+  color:#8070a8; line-height:1.7;
+  border-top: 1px solid rgba(201,168,76,0.15); margin-top:1rem;
+  background: #1c1028;
+">
+  <div style="margin-bottom:0.3rem; letter-spacing:0.05em;">
+    Tarot artwork by <strong style="color:#c9a84c">Pamela Colman Smith</strong> (1909) · Public Domain
+  </div>
+  <div style="font-size:0.72rem; opacity:0.6;">
+    Rider-Waite-Smith Tarot · First published by William Rider & Son, London
+  </div>
+</footer>
+
+</body>
+</html>

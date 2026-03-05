@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<title>The Fool's Journey · Tarot Study</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080610;
+    --gold: #c9a84c;
+    --gold2: #e8cc7a;
+    --gold3: #f5e4a8;
+    --lavender: #a78bca;
+    --rose: #c47a8a;
+    --teal: #5ba8a0;
+    --text: #e2d8f0;
+    --muted: #8878a8;
+    --border: rgba(201,168,76,0.2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Site nav ── */
+  .site-nav {
+    width: 100%;
+    background: rgba(8,6,16,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    padding: 0 1rem;
+  }
+  .site-nav a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.7rem 1.1rem;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .site-nav a:hover { color: var(--gold); }
+  .site-nav a.active { color: var(--gold2); border-bottom-color: var(--gold); }
+  .site-nav .nav-divider { color: rgba(201,168,76,0.2); font-size: 0.8rem; padding: 0 0.1rem; user-select: none; }
+  .site-nav .nav-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    background: linear-gradient(135deg, var(--gold), var(--lavender));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-right: auto;
+    padding: 0.7rem 0;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(75,45,138,0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 20% 80%, rgba(91,168,160,0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 80% 20%, rgba(196,122,138,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Stars */
+  .stars {
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+  }
+  .star-dot {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    animation: twinkle var(--d) ease-in-out infinite;
+    animation-delay: var(--delay);
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: var(--min-op); transform: scale(1); }
+    50% { opacity: var(--max-op); transform: scale(1.4); }
+  }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2.2rem, 7vw, 5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    background: linear-gradient(160deg, var(--gold3) 0%, var(--gold) 40%, var(--lavender) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.5s forwards;
+  }
+
+  .hero-subtitle {
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    color: var(--muted);
+    font-style: italic;
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.7s forwards;
+  }
+
+  .hero-fool-img {
+    width: min(180px, 45vw);
+    border-radius: 12px;
+    border: 2px solid rgba(201,168,76,0.35);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(201,168,76,0.1);
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.9s forwards;
+    filter: sepia(6%) contrast(1.05);
+  }
+
+  .scroll-cue {
+    opacity: 0;
+    animation: fadeUp 1s ease 1.3s forwards;
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    color: var(--muted); font-size: 0.75rem; letter-spacing: 0.15em;
+    font-family: 'Cinzel', serif;
+  }
+  .scroll-arrow {
+    width: 24px; height: 24px;
+    border-right: 2px solid var(--gold);
+    border-bottom: 2px solid var(--gold);
+    transform: rotate(45deg);
+    animation: bounce 2s ease-in-out infinite;
+    opacity: 0.6;
+  }
+  @keyframes bounce { 0%,100%{transform:rotate(45deg) translateY(0)} 50%{transform:rotate(45deg) translateY(6px)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── Intro ── */
+  .intro-section {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 5rem 2rem 3rem;
+    text-align: center;
+  }
+  .intro-section p {
+    font-size: 1.2rem;
+    line-height: 1.85;
+    color: #cfc5e0;
+    margin-bottom: 1.4rem;
+  }
+  .intro-section p:first-child { font-size: 1.35rem; color: var(--text); }
+  .gold-text { color: var(--gold2); font-style: italic; }
+  .section-divider {
+    width: 120px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 3rem auto;
+  }
+
+  /* ── Chapter headers ── */
+  .chapter-header {
+    text-align: center;
+    padding: 4rem 2rem 2rem;
+    position: relative;
+  }
+  .chapter-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+  .chapter-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    color: var(--gold2);
+    margin-bottom: 0.8rem;
+    line-height: 1.2;
+  }
+  .chapter-desc {
+    font-size: 1rem;
+    color: var(--muted);
+    font-style: italic;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── Card story entries ── */
+  .journey-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .card-entry {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2.5rem;
+    align-items: start;
+    margin-bottom: 4rem;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+    position: relative;
+  }
+  .card-entry.visible { opacity: 1; transform: translateY(0); }
+  .card-entry.reverse { grid-template-columns: 1fr 200px; }
+  .card-entry.reverse .card-img-col { order: 2; }
+  .card-entry.reverse .card-text-col { order: 1; text-align: right; }
+  .card-entry.reverse .card-number-badge { margin-left: auto; margin-right: 0; }
+  .card-entry.reverse .card-keywords { justify-content: flex-end; }
+  .card-entry.reverse .card-lesson::before { left: auto; right: -1.5rem; }
+
+  .card-img-col {
+    position: relative;
+  }
+  .card-img-col img {
+    width: 100%;
+    border-radius: 10px;
+    border: 2px solid rgba(201,168,76,0.3);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.6), 0 0 20px rgba(201,168,76,0.06);
+    filter: sepia(5%) contrast(1.04);
+    display: block;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    /* allow Wikimedia images to load without referrer block */
+    content-visibility: auto;
+  }
+  .card-img-col img:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.7), 0 0 30px rgba(201,168,76,0.15);
+  }
+  .card-glow {
+    position: absolute; inset: -8px;
+    border-radius: 14px;
+    background: radial-gradient(ellipse at center, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .card-text-col { padding-top: 0.5rem; }
+
+  .card-number-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 20px;
+    padding: 0.25rem 0.8rem;
+    margin-bottom: 0.8rem;
+  }
+  .badge-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+  }
+
+  .card-name {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+    color: var(--gold2);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .card-tagline {
+    font-size: 1rem;
+    color: var(--lavender);
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  .card-story {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #cfc5e0;
+    margin-bottom: 1.2rem;
+  }
+
+  .card-lesson {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: var(--muted);
+    padding-left: 1rem;
+    border-left: 2px solid rgba(201,168,76,0.3);
+    font-style: italic;
+    position: relative;
+  }
+
+  .card-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 1rem;
+  }
+  .kw {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* ── Timeline connector ── */
+  .timeline-dot {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0 2.5rem;
+    position: relative;
+  }
+  .timeline-dot::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to bottom, transparent, rgba(201,168,76,0.2), transparent);
+  }
+  .t-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 8px rgba(201,168,76,0.5);
+    z-index: 1;
+  }
+
+  /* ── Chapter colors ── */
+  .chapter-1 .card-name { color: var(--gold2); }
+  .chapter-2 .card-name { color: #b8d4a8; }
+  .chapter-3 .card-name { color: var(--lavender); }
+
+  /* ── Closing section ── */
+  .closing {
+    max-width: 720px;
+    margin: 4rem auto 0;
+    padding: 4rem 2rem 6rem;
+    text-align: center;
+  }
+  .closing h2 {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.4rem, 4vw, 2rem);
+    color: var(--gold2);
+    margin-bottom: 1.5rem;
+  }
+  .closing p {
+    font-size: 1.15rem;
+    line-height: 1.85;
+    color: #cfc5e0;
+    margin-bottom: 1.2rem;
+  }
+  .closing-quote {
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    background: rgba(201,168,76,0.04);
+    line-height: 1.7;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2.5rem;
+  }
+  .cta-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    padding: 0.75rem 1.8rem;
+    border-radius: 24px;
+    text-decoration: none;
+    transition: all 0.25s;
+    cursor: pointer;
+    border: none;
+  }
+  .cta-primary {
+    background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(167,139,202,0.2));
+    border: 1px solid rgba(201,168,76,0.4);
+    color: var(--gold2);
+  }
+  .cta-primary:hover { background: linear-gradient(135deg, rgba(201,168,76,0.3), rgba(167,139,202,0.3)); transform: translateY(-2px); }
+  .cta-secondary {
+    background: transparent;
+    border: 1px solid rgba(167,139,202,0.3);
+    color: var(--lavender);
+  }
+  .cta-secondary:hover { border-color: var(--lavender); transform: translateY(-2px); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 1.5rem 1rem 2rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.7;
+    border-top: 1px solid rgba(201,168,76,0.1);
+  }
+  footer strong { color: var(--gold); }
+
+  /* ── Mobile ── */
+  @media (max-width: 640px) {
+    .card-entry, .card-entry.reverse {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .card-entry .card-img-col { max-width: 180px; margin: 0 auto; }
+    .card-entry.reverse .card-img-col { order: 1; }
+    .card-entry.reverse .card-text-col { order: 2; text-align: left; }
+    .card-entry.reverse .card-number-badge { margin-left: 0; }
+    .card-entry.reverse .card-keywords { justify-content: flex-start; }
+    .card-entry.reverse .card-lesson::before { left: -1.5rem; right: auto; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <span class="nav-brand">✦ TAROT STUDY</span>
+  <a href="index.html">🃏 Flashcards</a>
+  <span class="nav-divider">·</span>
+  <a href="journey.html" class="active">✨ The Fool's Journey</a>
+  <span class="nav-divider">·</span>
+  <a href="worksheet.html">📋 Reference & Worksheet</a>
+</nav>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-eyebrow">The Story of the Major Arcana</div>
+  <h1 class="hero-title">The Fool's<br>Journey</h1>
+  <p class="hero-subtitle">Every soul begins as The Fool — naive, fearless, and full of wonder. What follows is the greatest adventure ever told.</p>
+  <img class="hero-fool-img"
+    src="https://upload.wikimedia.org/wikipedia/commons/ar00.jpg"
+    alt="The Fool" />
+  <div class="scroll-cue">
+    <span>Begin the journey</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- Intro -->
+<section class="intro-section">
+  <p>The 22 cards of the Major Arcana are not random symbols. They tell <span class="gold-text">one continuous story</span> — the journey of a soul from innocent beginning to hard-won wholeness.</p>
+  <p>This is The Fool's Journey. It is the story of every human life: the lessons we must learn, the teachers who appear when we need them, the dark nights we survive, and the joy waiting on the other side.</p>
+  <p>It is your story. It has always been your story.</p>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════ CHAPTER ONE ════ -->
+<div class="chapter-header">
+  <span class="chapter-label">Chapter One · Cards 0–VII</span>
+  <h2 class="chapter-title">Into the World</h2>
+  <p class="chapter-desc">The Fool enters the material world and meets the great outer teachers — the forces of creation, authority, wisdom and will.</p>
+</div>
+
+<div class="journey-container chapter-1">
+
+  <!-- The Fool -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar00.jpg" alt="The Fool" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · 0</span></div>
+      <div class="card-name">The Fool</div>
+      <div class="card-tagline">"Before the beginning, there is only possibility."</div>
+      <p class="card-story">Our hero stands at the edge of a cliff, face turned toward the sun, a small bag of belongings on his shoulder and a white rose in his hand. He is about to step off into the void — not from ignorance, but from a kind of divine trust. The little dog beside him barks a warning. He does not hear it, or perhaps he hears it and leaps anyway.</p>
+      <p class="card-story">This is how every great journey begins. Not with certainty, but with <em>faith</em>. The Fool carries zero — he is pure potential, unconditioned by experience, unburden by the past. He is all of us before life shapes us.</p>
+      <div class="card-lesson">The courage to begin is its own kind of wisdom. Every master was once a beginner who simply refused to stop.</div>
+      <div class="card-keywords">
+        <span class="kw">BEGINNINGS</span><span class="kw">FAITH</span><span class="kw">SPONTANEITY</span><span class="kw">POTENTIAL</span><span class="kw">INNOCENCE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Magician -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar01.jpg" alt="The Magician" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · I</span></div>
+      <div class="card-name">The Magician</div>
+      <div class="card-tagline">"You have everything you need."</div>
+      <p class="card-story">The first figure The Fool meets is The Magician — a robed figure standing before a table bearing all four elemental tools: a wand, a cup, a sword, and a pentacle. One hand raises a wand toward heaven; one hand points to the earth. <em>As above, so below.</em></p>
+      <p class="card-story">The Magician's lesson is electrifying: you already possess everything required to create the life you want. The resources are on the table. The question is whether you have the will to use them. The Fool watches, transfixed. For the first time, he sees his own potential.</p>
+      <div class="card-lesson">Will is the wand. Your attention, your desire, your discipline — these are the true tools of creation. Nothing is missing. Only action is required.</div>
+      <div class="card-keywords">
+        <span class="kw">MANIFESTATION</span><span class="kw">WILL</span><span class="kw">SKILL</span><span class="kw">ACTION</span><span class="kw">POWER</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- High Priestess -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar02.jpg" alt="The High Priestess" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · II</span></div>
+      <div class="card-name">The High Priestess</div>
+      <div class="card-tagline">"Be still. The answer lives in the silence."</div>
+      <p class="card-story">Excited by The Magician's revelation, The Fool rushes forward — only to encounter a serene woman seated between two great pillars, a veil of pomegranates behind her. She does not speak. She simply holds a scroll in her lap and watches him with ancient, patient eyes.</p>
+      <p class="card-story">After the Magician showed The Fool the power of action, the High Priestess shows him the equal power of <em>stillness</em>. The conscious mind is powerful, yes — but beneath it runs a deeper river. Intuition. Mystery. The wisdom that cannot be read from any book, only felt.</p>
+      <div class="card-lesson">The loudest answer is rarely the truest one. Learn to sit in the not-knowing long enough to hear what whispers beneath it.</div>
+      <div class="card-keywords">
+        <span class="kw">INTUITION</span><span class="kw">MYSTERY</span><span class="kw">INNER KNOWING</span><span class="kw">PATIENCE</span><span class="kw">DEPTH</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Empress -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar03.jpg" alt="The Empress" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · III</span></div>
+      <div class="card-name">The Empress</div>
+      <div class="card-tagline">"Life is generous. Let yourself receive it."</div>
+      <p class="card-story">The Fool stumbles into a lush garden where a radiant, pregnant woman sits on a throne of cushions surrounded by wheat and wildflowers. She is The Empress — the embodiment of nature itself, of beauty, of creative abundance overflowing. There is wheat at her feet. A forest behind her. A river running beside her.</p>
+      <p class="card-story">She teaches The Fool something the world often forgets: that abundance is the natural state of things. Growth is not something you force — it is something you allow. The Fool begins to understand that creation requires receptivity as much as action.</p>
+      <div class="card-lesson">You are made of the same substance as stars and forests. Abundance is not something you chase. It is something you remember you already are.</div>
+      <div class="card-keywords">
+        <span class="kw">ABUNDANCE</span><span class="kw">NATURE</span><span class="kw">FERTILITY</span><span class="kw">NURTURING</span><span class="kw">BEAUTY</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Emperor -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar04.jpg" alt="The Emperor" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · IV</span></div>
+      <div class="card-name">The Emperor</div>
+      <div class="card-tagline">"Structure is not a cage. It is the skeleton that lets you stand."</div>
+      <p class="card-story">From the garden of the Empress, The Fool comes to a barren mountain throne where an armored king sits rigid and unsmiling. The Emperor. He is all that the Empress is not — angular, firm, orderly. Where she flows, he holds. Where she grows wild, he builds walls.</p>
+      <p class="card-story">But The Fool learns not to dismiss him. The Emperor teaches the discipline and structure that turn a dream into a reality. Vision without form is just a wish. The garden of the Empress needs the stone walls of the Emperor to become a kingdom.</p>
+      <div class="card-lesson">You cannot build a life on feeling alone. At some point the dream requires a foundation, a plan, a commitment to see it through even when it is hard.</div>
+      <div class="card-keywords">
+        <span class="kw">STRUCTURE</span><span class="kw">AUTHORITY</span><span class="kw">STABILITY</span><span class="kw">DISCIPLINE</span><span class="kw">LEADERSHIP</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Hierophant -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar05.jpg" alt="The Hierophant" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · V</span></div>
+      <div class="card-name">The Hierophant</div>
+      <div class="card-tagline">"Those who came before left a road. Walk it before you abandon it."</div>
+      <p class="card-story">Next The Fool enters a great temple and kneels before a robed religious figure who raises his hand in blessing. The Hierophant is the keeper of tradition — of religion, institutions, ceremony, and collective wisdom. He represents the accumulated knowledge of generations.</p>
+      <p class="card-story">The young Fool may feel restless here, wanting to make his own rules. But the Hierophant is patient. His lesson: before you break with tradition, understand it. There is wisdom in what has endured. The keys at his feet can unlock mysteries — if you are humble enough to ask for them.</p>
+      <div class="card-lesson">Tradition is humanity's memory. Honor what came before even as you find your own path. The most radical mystics were often the most disciplined students.</div>
+      <div class="card-keywords">
+        <span class="kw">TRADITION</span><span class="kw">WISDOM</span><span class="kw">MENTORSHIP</span><span class="kw">INSTITUTIONS</span><span class="kw">RITUAL</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Lovers -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar06.jpg" alt="The Lovers" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · VI</span></div>
+      <div class="card-name">The Lovers</div>
+      <div class="card-tagline">"Every choice is a vow. Choose who you truly are."</div>
+      <p class="card-story">Then — love arrives. The Fool falls completely, devastatingly in love. A great angel spreads wings above two figures in a sun-drenched garden, blessing their union. But The Lovers card is not simply about romance. It is about the most sacred act a human being can perform: <em>choosing</em>.</p>
+      <p class="card-story">The man looks at the woman. The woman looks at the angel. This is the card of alignment — of heart and higher self in agreement. The Fool must choose not just a partner, but a set of values, an identity, a direction. And he must choose consciously, with his whole heart.</p>
+      <div class="card-lesson">The deepest choices are never between good and bad. They are between two goods — two versions of yourself. Choose the one that is most truly you.</div>
+      <div class="card-keywords">
+        <span class="kw">LOVE</span><span class="kw">CHOICE</span><span class="kw">VALUES</span><span class="kw">ALIGNMENT</span><span class="kw">UNION</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Chariot -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar07.jpg" alt="The Chariot" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · VII</span></div>
+      <div class="card-name">The Chariot</div>
+      <div class="card-tagline">"Victory belongs to those who refuse to be pulled apart."</div>
+      <p class="card-story">Armed with his choices and his teachers' lessons, The Fool goes to war — not with armies, but with himself. The Chariot is a warrior in a stone vessel pulled by two sphinxes, one black and one white. They pull in opposite directions. He holds no reins. He controls them through pure will and focused intention alone.</p>
+      <p class="card-story">The Fool has learned that life is full of opposing forces — desire and discipline, feeling and reason, fear and courage. The Chariot teaches that mastery is not the absence of conflict but the ability to direct it. To move forward anyway, with contradictions in tow.</p>
+      <div class="card-lesson">Willpower is not the suppression of your inner chaos. It is the art of riding it. The sphinxes don't have to agree — they just have to move together.</div>
+      <div class="card-keywords">
+        <span class="kw">WILLPOWER</span><span class="kw">VICTORY</span><span class="kw">CONTROL</span><span class="kw">DETERMINATION</span><span class="kw">MOMENTUM</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ════ CHAPTER TWO ════ -->
+<div class="chapter-header">
+  <span class="chapter-label">Chapter Two · Cards VIII–XIV</span>
+  <h2 class="chapter-title">The Inner Teachers</h2>
+  <p class="chapter-desc">The outer world has given The Fool what it can. Now the real work begins — the journey inward, where the greatest teachers are not figures on thrones but truths within.</p>
+</div>
+
+<div class="journey-container chapter-2">
+
+  <!-- Strength -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar08.jpg" alt="Strength" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · VIII</span></div>
+      <div class="card-name">Strength</div>
+      <div class="card-tagline">"The lion is not your enemy. It is your power, waiting to be loved."</div>
+      <p class="card-story">The Fool meets a woman in a white dress calmly closing the jaws of a great lion. She uses no weapons, no chains — only her bare hands and an unshakeable gentleness. The infinity symbol floats above her head. The lion leans into her touch.</p>
+      <p class="card-story">This is the card the Fool has been building toward. Real strength, it turns out, is not the Emperor's iron armor or the Chariot's driving force. It is the quiet, patient power that comes from having faced your own inner beast — your rage, your fear, your raw animal nature — and chosen love over suppression.</p>
+      <div class="card-lesson">You do not overcome your darkness by fighting it. You transform it by befriending it. The parts of you that scare you most hold your greatest power.</div>
+      <div class="card-keywords">
+        <span class="kw">INNER STRENGTH</span><span class="kw">COMPASSION</span><span class="kw">PATIENCE</span><span class="kw">COURAGE</span><span class="kw">MASTERY</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Hermit -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar09.jpg" alt="The Hermit" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · IX</span></div>
+      <div class="card-name">The Hermit</div>
+      <div class="card-tagline">"Solitude is not loneliness. It is where you finally hear yourself."</div>
+      <p class="card-story">Weary from battles both outer and inner, The Fool withdraws from the world. He climbs a mountain alone, wrapped in grey robes, and holds up a lantern in the darkness. The lantern holds a star. It lights only the next step. That is enough.</p>
+      <p class="card-story">The Hermit is one of the most misunderstood figures in the deck. He is not a sad recluse — he is a sage who has chosen depth over noise. His withdrawal is not defeat. It is the necessary turning inward that precedes every great transformation. The Fool is learning to be his own guide.</p>
+      <div class="card-lesson">Every person who has ever changed their life did it in a period of sacred solitude — a season of listening that the busy world cannot provide. Honor your need to go quiet.</div>
+      <div class="card-keywords">
+        <span class="kw">SOLITUDE</span><span class="kw">INTROSPECTION</span><span class="kw">WISDOM</span><span class="kw">INNER LIGHT</span><span class="kw">GUIDANCE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- Wheel of Fortune -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar10.jpg" alt="Wheel of Fortune" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · X</span></div>
+      <div class="card-name">Wheel of Fortune</div>
+      <div class="card-tagline">"Nothing is fixed. Everything turns. You are not stuck — you are between."</div>
+      <p class="card-story">Coming down from his mountain, The Fool looks up and sees a great wheel spinning in the sky — figures rising on one side, falling on the other, the sphinx of wisdom sitting still at the top. The wheel turns. It always turns.</p>
+      <p class="card-story">This is a profound humbling. Even with strength, wisdom, and will — you are not in control of everything. Fate has its own rhythms. Seasons change. Luck shifts. What matters is not where on the wheel you currently sit, but whether you can stay centered enough to ride it with grace.</p>
+      <div class="card-lesson">Life is cyclical. The fall is not the end and the rise is not permanent. The one who masters this truth stops fearing change and starts moving with it.</div>
+      <div class="card-keywords">
+        <span class="kw">FATE</span><span class="kw">CYCLES</span><span class="kw">LUCK</span><span class="kw">KARMA</span><span class="kw">TURNING POINT</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- Justice -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar11.jpg" alt="Justice" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XI</span></div>
+      <div class="card-name">Justice</div>
+      <div class="card-tagline">"Every action writes itself into the fabric of things. Choose accordingly."</div>
+      <p class="card-story">The Fool stands before a crowned woman holding scales in one hand and a sword in the other. She looks at him with clear, impartial eyes. He realizes with a jolt that the wheel of fortune is not random — beneath it runs the law of cause and effect. Every choice he has ever made has brought him precisely here.</p>
+      <p class="card-story">Justice does not punish. She simply reflects. She shows The Fool that he is not a leaf blown by the wind — he is the author of his own circumstances. This truth is both sobering and deeply empowering.</p>
+      <div class="card-lesson">Accountability is not cruelty. When you stop blaming and start owning, you discover you were the one holding the power all along.</div>
+      <div class="card-keywords">
+        <span class="kw">TRUTH</span><span class="kw">FAIRNESS</span><span class="kw">CAUSE & EFFECT</span><span class="kw">ACCOUNTABILITY</span><span class="kw">LAW</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Hanged Man -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar12.jpg" alt="The Hanged Man" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XII</span></div>
+      <div class="card-name">The Hanged Man</div>
+      <div class="card-tagline">"What if the only way forward is to stop?"</div>
+      <p class="card-story">And then The Fool stops. Completely. He finds himself suspended upside down from a tree, one leg crossed behind the other, hands behind his back. He is not struggling. His face is serene. A golden halo glows around his head.</p>
+      <p class="card-story">This voluntary suspension is one of the most mysterious and important moments in the journey. The Fool has tried action, tried wisdom, tried will — and now he is asked to try <em>surrender</em>. To hang between worlds. To see everything from an entirely different angle. And in that inverted stillness, something shifts. The halo appears. Illumination arrives precisely when he stops forcing.</p>
+      <div class="card-lesson">There is a kind of wisdom that only arrives in surrender. Not giving up — but letting go of the need to control what cannot be controlled. The pause is the portal.</div>
+      <div class="card-keywords">
+        <span class="kw">SURRENDER</span><span class="kw">PAUSE</span><span class="kw">SACRIFICE</span><span class="kw">NEW PERSPECTIVE</span><span class="kw">WAITING</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- Death -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar13.jpg" alt="Death" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XIII</span></div>
+      <div class="card-name">Death</div>
+      <div class="card-tagline">"The caterpillar does not grieve the cocoon it leaves behind."</div>
+      <p class="card-story">A skeleton in black armor rides a white horse across a landscape of fallen figures. A king lies defeated. A priest prays. A child offers flowers. A maiden turns away. And yet — on the horizon, between two towers, the sun rises. It always rises.</p>
+      <p class="card-story">The Fool does not die here. But something in him does — and must. The old version of himself, the old identity, the old story he has been telling. Death is the great transformer. It is not tragedy. It is the universe insisting that you have outgrown what you were. The white horse carries you forward whether you are ready or not.</p>
+      <div class="card-lesson">Every ending is a becoming. The grief is real. The loss is real. And the sunrise on the horizon is also real. All three truths can coexist.</div>
+      <div class="card-keywords">
+        <span class="kw">TRANSFORMATION</span><span class="kw">ENDINGS</span><span class="kw">CHANGE</span><span class="kw">REBIRTH</span><span class="kw">RELEASE</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- Temperance -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar14.jpg" alt="Temperance" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XIV</span></div>
+      <div class="card-name">Temperance</div>
+      <div class="card-tagline">"You are the angel pouring between two worlds."</div>
+      <p class="card-story">After Death's transformation, The Fool emerges reborn — and finds a great angel standing at the edge of a pool, pouring water endlessly between two golden cups. One foot rests on land, one in water. The flow is continuous, effortless, perfect. Irises bloom at her feet. A crown of light glows in the mountains beyond.</p>
+      <p class="card-story">Temperance is the great integration — the alchemy of bringing together what was once divided. Masculine and feminine. Heaven and earth. Past and future. The Fool learns that he does not have to choose between opposites — he can hold them in dynamic balance, pour ceaselessly between them, and let the alchemy transform everything.</p>
+      <div class="card-lesson">The middle path is not compromise. It is mastery. The one who can hold two opposites in loving tension without collapsing into either has found the narrow gate.</div>
+      <div class="card-keywords">
+        <span class="kw">BALANCE</span><span class="kw">ALCHEMY</span><span class="kw">MODERATION</span><span class="kw">PATIENCE</span><span class="kw">PURPOSE</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ════ CHAPTER THREE ════ -->
+<div class="chapter-header">
+  <span class="chapter-label">Chapter Three · Cards XV–XXI</span>
+  <h2 class="chapter-title">The Dark Night & The Dawn</h2>
+  <p class="chapter-desc">The final trial. The Fool must face the deepest shadows — and in doing so, discover the light that was always there, waiting.</p>
+</div>
+
+<div class="journey-container chapter-3">
+
+  <!-- The Devil -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar15.jpg" alt="The Devil" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XV</span></div>
+      <div class="card-name">The Devil</div>
+      <div class="card-tagline">"The chains are loose. You could leave. Why don't you?"</div>
+      <p class="card-story">Just when The Fool thinks he has achieved balance, he finds himself in a dark place. A great horned figure squats on a pedestal. Below him, two figures are chained — but look closely: the chains hang loose around their necks. They could remove them at any moment. They do not.</p>
+      <p class="card-story">The Devil represents every way The Fool keeps himself small: addiction, obsession, the comfort of familiar suffering, the stories about himself he refuses to release. The shadow self. The parts too shameful to examine. The Fool must look directly at what binds him — and recognize that the lock is on the inside.</p>
+      <div class="card-lesson">You are not trapped by your circumstances. You are trapped by your certainty that you are trapped. Name the chain. See it clearly. Then ask: who put it there?</div>
+      <div class="card-keywords">
+        <span class="kw">SHADOW</span><span class="kw">BONDAGE</span><span class="kw">MATERIALISM</span><span class="kw">ADDICTION</span><span class="kw">ILLUSION</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Tower -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar16.jpg" alt="The Tower" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XVI</span></div>
+      <div class="card-name">The Tower</div>
+      <div class="card-tagline">"What cannot be healed must be broken open."</div>
+      <p class="card-story">Lightning strikes. A tall stone tower — built on false foundations, on ego, on comfortable lies — is split open by a bolt from heaven. A crown is blasted from its top. Two figures fall. Flames burst from the windows. Everything The Fool thought was solid is revealed to be hollow.</p>
+      <p class="card-story">The Tower is terrifying in the moment. But it is also the most honest card in the deck. It arrives when we have refused to leave the Devil's chains ourselves. So the universe intervenes. The false structure must fall so the real one can be built. The lightning is not punishment — it is grace wearing a frightening face.</p>
+      <div class="card-lesson">You can choose to walk out of the tower, or you can wait for lightning. Either way, what is false will not stand. Embrace the collapse — it is clearing ground for something true.</div>
+      <div class="card-keywords">
+        <span class="kw">UPHEAVAL</span><span class="kw">REVELATION</span><span class="kw">LIBERATION</span><span class="kw">SUDDEN CHANGE</span><span class="kw">TRUTH</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Star -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar17.jpg" alt="The Star" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XVII</span></div>
+      <div class="card-name">The Star</div>
+      <div class="card-tagline">"After the storm, one star is enough to find your way home."</div>
+      <p class="card-story">The tower has fallen. The smoke clears. And there, in the quiet dark that follows destruction, The Fool finds a naked woman kneeling beside a still pool, pouring water from two pitchers in an endless, unhurried flow. Above her blazes one enormous eight-pointed star, surrounded by seven smaller ones. An ibis perches in a nearby tree.</p>
+      <p class="card-story">The Star is the breath after the cry. It is the moment of radical, vulnerable hope that comes when everything else has been stripped away. There is no armor here, no tower, no throne — just a human soul, open to the universe, trusting that the water will keep flowing, that the stars still shine, that something beautiful still waits ahead.</p>
+      <div class="card-lesson">Hope is not naivety. It is the radical act of remaining open after being broken. The Star shines brightest when the sky around it is darkest.</div>
+      <div class="card-keywords">
+        <span class="kw">HOPE</span><span class="kw">FAITH</span><span class="kw">RENEWAL</span><span class="kw">HEALING</span><span class="kw">SERENITY</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Moon -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar18.jpg" alt="The Moon" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XVIII</span></div>
+      <div class="card-name">The Moon</div>
+      <div class="card-tagline">"The path does not end in the dark. Keep walking."</div>
+      <p class="card-story">But the journey is not over. The Fool walks through a dark and bewildering landscape — a full moon face stares down with uncanny eyes, a dog and wolf howl at the sky, a crayfish crawls from a murky pool, and a winding path disappears between two looming towers into an uncertain distance.</p>
+      <p class="card-story">The Moon is the last great test: the test of illusion. The Fool does not know what is real and what is fear, what is intuition and what is paranoia. Everything seems to shift and shimmer. But he has come too far to turn back. He must walk through the moonlit dark, trusting his feet if not his eyes.</p>
+      <div class="card-lesson">The unconscious reveals itself in the dark. Not to deceive you, but to make visible what daylight hides. What you fear in the dark is often the very thing trying to help you.</div>
+      <div class="card-keywords">
+        <span class="kw">ILLUSION</span><span class="kw">FEAR</span><span class="kw">UNCONSCIOUS</span><span class="kw">MYSTERY</span><span class="kw">INTUITION</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The Sun -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar19.jpg" alt="The Sun" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XIX</span></div>
+      <div class="card-name">The Sun</div>
+      <div class="card-tagline">"You made it. Now — feel it."</div>
+      <p class="card-story">The Fool emerges from the Moon's dark labyrinth into blazing, golden light. A radiant sun with a joyful face fills the sky. A naked child rides a white horse through a sunflower garden, waving a red banner, laughing. There is no shadow here. No complexity. Just pure, unguarded joy.</p>
+      <p class="card-story">This is the card that makes every prior suffering make sense. The child is The Fool — but reborn. Stripped of every false persona by the journey, what remains is this: an open heart, a free body, a soul that has been through everything and come out the other side <em>laughing</em>. The Sun is the reward that cannot be taken. It was always there.</p>
+      <div class="card-lesson">Joy is not childish. It is what you earn by going all the way through. The ones who laugh loudest and most freely are often those who have suffered most deeply and chose to heal anyway.</div>
+      <div class="card-keywords">
+        <span class="kw">JOY</span><span class="kw">VITALITY</span><span class="kw">SUCCESS</span><span class="kw">CLARITY</span><span class="kw">FREEDOM</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- Judgement -->
+  <div class="card-entry reverse" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar20.jpg" alt="Judgement" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XX</span></div>
+      <div class="card-name">Judgement</div>
+      <div class="card-tagline">"The trumpet has sounded. Will you answer?"</div>
+      <p class="card-story">Before the final threshold, one last moment of reckoning. A great angel descends from the clouds, blowing a trumpet. Below, figures rise from coffins — men, women, children — arms spread wide, faces turned upward in awe and recognition. They are rising not to be judged, but to be <em>called</em>.</p>
+      <p class="card-story">Judgement asks The Fool to look back over everything — every lesson, every wound, every gift, every choice — and to integrate it. Not to regret, not to cling, but to own all of it as the raw material of who he now is. And having owned it, to answer the call: to step fully into his truest self, the one the whole journey has been carving into being.</p>
+      <div class="card-lesson">The final judgement is not God's verdict on you. It is your verdict on yourself — the moment you decide you are finally, truly ready to become who you were always meant to be.</div>
+      <div class="card-keywords">
+        <span class="kw">AWAKENING</span><span class="kw">ABSOLUTION</span><span class="kw">CALLING</span><span class="kw">RENEWAL</span><span class="kw">RECKONING</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-dot"><div class="t-dot"></div></div>
+
+  <!-- The World -->
+  <div class="card-entry" data-scroll>
+    <div class="card-img-col">
+      <div class="card-glow"></div>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/ar21.jpg" alt="The World" />
+    </div>
+    <div class="card-text-col">
+      <div class="card-number-badge"><span class="badge-num">CARD · XXI</span></div>
+      <div class="card-name">The World</div>
+      <div class="card-tagline">"You are complete. You are free. You are home."</div>
+      <p class="card-story">And at last — The World. A dancing figure moves freely inside a great oval wreath of eternal laurel, a wand in each hand, a purple scarf flowing. In the four corners, the fixed signs watch: the human, the eagle, the lion, the bull. All four elements. All four directions. The whole universe present and in witness.</p>
+      <p class="card-story">The Fool has completed his journey. He is no longer naive — he is wise. He is no longer fearless out of ignorance — he is fearless out of having faced everything. He has mastered the outer world and the inner world. He has died and been reborn. He has loved, lost, surrendered, and risen.</p>
+      <p class="card-story">And now he dances. Not because nothing is difficult — but because he knows he can meet whatever comes next. He is whole. He is home. And somewhere, just off the edge of the World card, a new adventure is already beginning — because the wreath is also a zero. The Fool is ready to begin again.</p>
+      <div class="card-lesson">Completion is not the end. It is the full circle returning to its beginning — but you are different now. You have earned the right to leap again, this time with everything you have learned.</div>
+      <div class="card-keywords">
+        <span class="kw">COMPLETION</span><span class="kw">WHOLENESS</span><span class="kw">INTEGRATION</span><span class="kw">FREEDOM</span><span class="kw">THE FULL CIRCLE</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Closing -->
+<section class="closing">
+  <div class="section-divider" style="margin-bottom:3rem"></div>
+  <h2>The Journey Never Ends</h2>
+  <p>The Fool's Journey is not a story you read once and set aside. It is a map you return to again and again — because life keeps moving, and the cards keep meeting you exactly where you are.</p>
+  <p>Some years you are The Chariot, driving hard toward a goal. Some seasons you are The Hermit, turning inward to find what only silence can reveal. Some moments — the ones that break you open — you are unmistakably The Tower.</p>
+  <div class="closing-quote">
+    "The tarot does not tell you what will happen.<br>It shows you who you already are — and who you are becoming."
+  </div>
+  <p>Every card you draw is an invitation. Not a verdict, not a prophecy — an invitation to look more honestly, more tenderly, more bravely at your own unfolding story.</p>
+  <p>The Fool leapt off the cliff at the beginning trusting in the journey. You already have too.</p>
+  <div class="cta-row">
+    <a href="index.html" class="cta-btn cta-primary">🃏 Study the Cards</a>
+    <a href="worksheet.html" class="cta-btn cta-secondary">📋 Reference & Worksheet</a>
+  </div>
+</section>
+
+<footer>
+  <div style="margin-bottom:0.3rem">
+    Tarot artwork by <strong>Pamela Colman Smith</strong> (1909) · Public Domain
+  </div>
+  <div style="font-size:0.72rem;opacity:0.6">
+    Rider-Waite-Smith Tarot · First published by William Rider & Son, London
+  </div>
+</footer>
+
+<script>
+// ── Starfield ──
+(function(){
+  const stars = document.getElementById('stars');
+  for(let i=0;i<80;i++){
+    const d = document.createElement('div');
+    const size = Math.random()<0.2 ? 2 : 1;
+    d.className = 'star-dot';
+    d.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      --d:${2+Math.random()*4}s;
+      --delay:${Math.random()*5}s;
+      --min-op:${0.1+Math.random()*0.2};
+      --max-op:${0.4+Math.random()*0.5};
+    `;
+    stars.appendChild(d);
+  }
+})();
+
+// ── Scroll reveal ──
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('[data-scroll]').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
